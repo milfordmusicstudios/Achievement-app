@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Review Logs | Achievement App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .scroll-wrapper {
+      overflow-x: auto;
+      overflow-y: auto;
+      width: 100%;
+      max-height: calc(100vh - 160px);
+      padding: 10px 0 30px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-gutter: stable both-edges;
+    }
+
+    main.app {
+      padding-bottom: 60px;
+    }
+
+    .log-feed {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body class="tall-background">
+<main class="app">
+  <!-- 🔹 Top Bar with Home Button -->
+  <div class="top-bar">
+    <button class="blue-button" onclick="location.href='home.html'">Home</button>
+    <h2 class="leaderboard-title" style="flex: 1; text-align: center;">Review Logs</h2>
+  </div>
+
+  <!-- 🔹 Category Summary Section -->
+  <div id="categorySummaries" class="category-summary-wrapper"></div>
+
+  <!-- 🔹 Log Feed Table Display Area -->
+  <div class="log-feed scroll-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="sortLogsBy('user')">User <span id="sort-icon-user"></span></th>
+          <th onclick="sortLogsBy('category')">Category <span id="sort-icon-category"></span></th>
+          <th onclick="sortLogsBy('points')">Points <span id="sort-icon-points"></span></th>
+          <th>Note</th>
+          <th onclick="sortLogsBy('date')">Date <span id="sort-icon-date"></span></th>
+          <th onclick="sortLogsBy('status')">Status <span id="sort-icon-status"></span></th>
+        </tr>
+      </thead>
+      <tbody id="reviewTableBody">
+        <tr>
+          <td class="user-cell">Anna Allen</td>
+          <td><input class="category-input" value="Practice" /></td>
+          <td><input type="number" class="points-input" value="10" /></td>
+          <td><input class="note-input" value="Worked hard today." /></td>
+          <td><input type="date" class="date-input" value="2025-07-12" /></td>
+          <td>
+            <select class="status-input">
+              <option value="approved">Approved</option>
+              <option value="pending">Pending</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<footer>
+  &copy; 2025 Milford Music Studios Achievement App
+</footer>
+
+<!-- ✅ Scripts -->
+<script src="config.js"></script>
+<script src="data/categories.js"></script>
+<script src="auth.js"></script>
+<script src="review-logs.js"></script>
+</body>
+</html>

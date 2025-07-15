@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login | Achievement App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <main class="app">
+    <img src="Images/Logos/logo.png" alt="App Logo" class="logo" />
+    <h2 id="loginTitle">Achievement Awards</h2>
+
+    <form id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Email" required />
+      <input type="password" id="loginPassword" placeholder="Password" required />
+<div class="button-row">
+  <button type="submit" class="blue-button">Login</button>
+  <button type="button" class="blue-button" onclick="window.location.href='signup.html'">Sign Up</button>
+</div>
+    </form>
+
+    <p id="loginError" style="color: red; display: none; text-align: center; margin-top: 10px;">
+      Invalid email or password.
+    </p>
+  </main>
+
+  <footer>
+    &copy; 2025 Milford Music Studios Achievement App
+  </footer>
+
+  <!-- ✅ Login Script (placed at end to ensure DOM is loaded) -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById('loginForm');
+      const errorDisplay = document.getElementById('loginError');
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const emailInput = document.getElementById('loginEmail');
+        const passwordInput = document.getElementById('loginPassword');
+
+        const email = emailInput.value.trim().toLowerCase();
+        const password = passwordInput.value;
+
+        if (!email || !password) {
+          errorDisplay.style.display = 'block';
+          errorDisplay.textContent = 'Please enter both email and password.';
+          return;
+        }
+
+        fetch("http://10.0.0.220:3000/users")
+          .then(res => res.json())
+          .then(users => {
+            const user = users.find(u =>
+              u.email?.toLowerCase() === email &&
+              u.password === password
+            );
+
+            if (user) {
+              localStorage.setItem("loggedInUser", JSON.stringify(user));
+              const active = Array.isArray(user.role) ? user.role[0] : user.role;
+              localStorage.setItem("activeRole", active);
+              window.location.href = "home.html";
+            } else {
+              errorDisplay.style.display = "block";
+              errorDisplay.textContent = "Invalid email or password.";
+            }
+          })
+          .catch(err => {
+            console.error("Login error:", err);
+            errorDisplay.style.display = "block";
+            errorDisplay.textContent = "Server error. Please try again.";
+          });
+      });
+    });
+  </script>
+</body>
+</html>

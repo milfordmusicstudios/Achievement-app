@@ -1,0 +1,3 @@
+cd "C:\Users\lisarachelle85\OneDrive\Desktop\App Version 2\backend" && json-server --watch db.json --port 3000
+
+cd "C:\Users\lisarachelle85\OneDrive\Desktop\App Version 2\backend" && node server.js

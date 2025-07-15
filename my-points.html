@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Points | Achievement App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="tall-background">
+
+<main class="app">
+  <!-- Header with Home and Level Badge -->
+  <div class="top-bar">
+    <button class="blue-button" onclick="location.href='home.html'">Home</button>
+    <img id="myPointsBadge" class="badge" src="" alt="Level Badge" />
+  </div>
+
+  <!-- Category Summary Section -->
+  <div id="categorySummaries" class="category-summary-wrapper"></div>
+
+  <!-- Log Feed Table -->
+  <div class="log-feed">
+    <table>
+<thead>
+  <tr>
+    <th onclick="sortLogs('category')">Category <span id="sort-category">▲</span></th>
+    <th onclick="sortLogs('points')">Points <span id="sort-points">▲</span></th>
+    <th>Notes</th>
+    <th onclick="sortLogs('date')">Date <span id="sort-date">▼</span></th>
+    <th onclick="sortLogs('status')">Status <span id="sort-status">▲</span></th>
+  </tr>
+</thead>
+      <tbody id="logTableBody"></tbody>
+    </table>
+  </div>
+</main>
+
+<footer>
+  &copy; 2025 Milford Music Studios Achievement App
+</footer>
+
+<!-- ✅ Scripts -->
+<script src="config.js"></script>
+<script src="data/categories.js"></script>
+<script src="data/levels.js"></script>
+<script src="utils.js"></script>
+<script src="auth.js"></script>
+<script src="my-points.js"></script>
+
+</body>
+</html>

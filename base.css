@@ -1,0 +1,165 @@
+
+
+/* avatar style */
+.avatar {
+  width: 150px;
+  height: auto;
+  border-radius: 1rem;
+  background: transparent;
+}
+
+/* Level badge style */
+.badge, .level-badge {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: block;
+}
+
+/* Icon buttons */
+.icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* Table images */
+.table-category-image {
+  height: 40px;
+}
+
+
+/* Reset and global elements */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Segoe UI', sans-serif;
+  background: url("Images/Background/TallBackground.png") no-repeat center center fixed;
+  background-size: cover;
+  overflow: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Buttons */
+button {
+  font-size: 16px;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.blue-button {
+  background-color: #3eb7f8;
+  color: white;
+  padding: 10px 20px;
+  font-size: 14px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font-weight: bold;
+  transition: background 0.3s;
+  margin: 0;
+  text-align: center;
+}
+
+.blue-button:hover {
+  background-color: #199ee0;
+}
+
+.nav-button,
+.highlight-button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 1.25rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  text-align: left;
+  color: white;
+}
+
+.nav-button .icon,
+.highlight-button .icon {
+  width: 30px;
+  height: 30px;
+  margin-right: 8px;
+}
+
+.highlight-button {
+  background-color: #004bc6;
+  color: white;
+}
+
+.highlight-button:hover {
+  background-color: #003a9f;
+}
+
+.button-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.header {
+  text-align: center;
+  font-size: 26px;
+  margin-bottom: 10px;
+}
+
+.logo {
+  max-width: 180px;
+  display: block;
+  margin: 0 auto 20px;
+}
+
+.badge {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: block;
+}
+
+.avatar {
+  max-width: 100px;
+  height: auto;
+  border-radius: 15px;
+}
+
+.level-badge {
+  max-width: 120px;
+  height: auto;
+  float: right;
+  margin-top: -10px;
+  margin-right: 10px;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
