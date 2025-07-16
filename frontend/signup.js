@@ -69,16 +69,24 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
 
   const id = `${lastName}_${firstName}`.replace(/\s+/g, "_");
 
-  const newUser = {
-    firstName,
-    lastName,
-    instrument,
-    teacher,
-    email,
-    password,
-    id,
-    roles: ["student"]
-  };
+const newUser = {
+  id: `${lastName}_${firstName}`,
+  firstName,
+  lastName,
+  email,
+  password,
+  instrument: instrument || "",
+  avatar: `${lastName}_${firstName}`,
+  avatarUrl: `/uploads/${lastName}_${firstName}.png`,
+
+  // ✅ Fixed: hard-coded default role
+  roles: ["student"],
+
+  // ✅ Already correct
+  teacher: typeof teacher === "string" ? teacher : "",
+
+  createdAt: new Date().toISOString()
+};
 
   try {
 const res = await fetch(`${BASE_API}/users`, {
