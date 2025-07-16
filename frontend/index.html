@@ -30,6 +30,9 @@
     &copy; 2025 Milford Music Studios Achievement App
   </footer>
 
+  <!-- ✅ Load BASE_API configuration first -->
+  <script src="config.js"></script>
+
   <!-- ✅ Login Script (placed at end to ensure DOM is loaded) -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -51,7 +54,7 @@
           return;
         }
 
-fetch(`${BASE_API}/users`)
+        fetch(`${BASE_API}/users`)
           .then(res => res.json())
           .then(users => {
             const user = users.find(u =>
