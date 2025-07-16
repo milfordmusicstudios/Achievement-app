@@ -29,7 +29,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const studentRow = document.getElementById("studentSelectGroup");
 
     const categorySelect = document.getElementById("logCategory");
-    if (categorySelect && categorySelect.children.length === 0) {
+    console.log("Category select found:", categorySelect);
+    console.log("Categories to add:", categories);
+
+    if (categorySelect && categorySelect.children.length <= 1) {
       categories.forEach(cat => {
         const option = document.createElement("option");
         option.value = cat;
