@@ -1,3 +1,19 @@
 cd "C:\Users\lisarachelle85\OneDrive\Desktop\App Version 2\backend" && json-server --watch db.json --port 3000
 
 cd "C:\Users\lisarachelle85\OneDrive\Desktop\App Version 2\backend" && node server.js
+
+Upload Git Bash
+(Backend)
+
+git add .
+git commit -m "Your commit message here"
+git push origin main
+
+
+Issues:
+Leaderboard: not showing avatars
+Log Points: now showing categories
+Manage Users: need to be able to upload an avatar
+Manage Users: No save button?
+Manage Users: Teachers showing ID not teacher name
+Manage Users: Add User button doesn't work

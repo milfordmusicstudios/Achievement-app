@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 if (user.avatarUrl) {
   avatarImage.src = `${BASE_UPLOAD}${user.avatarUrl}`;
 } else if (user.avatar) {
-  avatarImage.src = `Images/avatars/${user.avatar}.png`;
+avatarImage.src = `${BASE_UPLOAD}/uploads/${user.avatar}.png`;
 } else {
   avatarImage.src = `Images/avatars/default.png`;
 }

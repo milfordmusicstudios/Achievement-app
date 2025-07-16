@@ -46,7 +46,8 @@ fetch(`${BASE_API}/logs`)
       document.getElementById('welcomeTitle').textContent = `Welcome ${user.firstName}!`;
 
 document.getElementById('homeavatar').src = user.avatarUrl
-  ? `${BASE_UPLOAD}${user.avatarUrl}`        : `Images/avatars/${user.avatar || 'default'}.png`;
+  ? `${BASE_UPLOAD}${user.avatarUrl}`
+  : `${BASE_UPLOAD}/uploads/${user.avatar || 'default'}.png`;
 
       const badge = document.getElementById('homeBadge');
       const progressCard = document.querySelector('.progress-card');

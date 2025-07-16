@@ -1,3 +1,4 @@
+
 // MANAGE USERS JS
 let allUsers = [];
 let currentEditingRow = null;
@@ -7,12 +8,15 @@ let currentMultiType = null;
 let currentSortColumn = null;
 let currentSortDirection = "asc";
 
-document.addEventListener("DOMContentLoaded", fetchUsers);
+document.addEventListener("DOMContentLoaded", () => {
+  fetchUsers();
+  document.getElementById("addUserBtn")?.addEventListener("click", addUser);
+});
 
 async function fetchUsers() {
   const res = await fetch(`${BASE_API}/users`);
   allUsers = await res.json();
-  sortUsersBy("lastName"); // ✅ Default sort on load
+  sortUsersBy("lastName");
 }
 
 function renderUserTable() {
@@ -29,9 +33,9 @@ function renderUserTable() {
       <td><input value="${user.email || ""}" onchange="editUser(this, '${user.id}', 'email')" /></td>
       <td><input value="${user.password || ""}" onchange="editUser(this, '${user.id}', 'password')" /></td>
       <td>
-        ${user.avatar 
-          ? `<img src="/Images/avatars/${user.avatar}.png" alt="Avatar" style="max-height: 40px; border-radius: 6px;" />`
-          : '—'}
+        <img src="${user.avatarUrl ? `${BASE_UPLOAD}${user.avatarUrl}` : `${BASE_UPLOAD}/uploads/${user.avatar || 'default'}.png`}" 
+             alt="Avatar" style="max-height: 40px; border-radius: 6px;" />
+        <input type="file" data-user-id="${user.id}" class="avatar-upload" style="display:block;margin-top:4px;" />
       </td>
       <td><button class="blue-button" onclick="openMultiSelect(this, '${user.id}', 'role')">${formatArray(user.roles || user.role)}</button></td>
       <td><button class="blue-button" onclick="openMultiSelect(this, '${user.id}', 'teacher')">${formatTeacherNames(user.teacher)}</button></td>
@@ -39,6 +43,37 @@ function renderUserTable() {
     `;
 
     tbody.appendChild(tr);
+  });
+
+  setupAvatarUploadHandlers();
+}
+
+function setupAvatarUploadHandlers() {
+  document.querySelectorAll(".avatar-upload").forEach(input => {
+    input.addEventListener("change", async (e) => {
+      const userId = e.target.dataset.userId;
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      try {
+        const res = await fetch(`${BASE_UPLOAD}/upload-avatar`, {
+          method: "POST",
+          body: formData
+        });
+        const result = await res.json();
+        if (!result.url) throw new Error("Upload failed");
+
+        const user = allUsers.find(u => u.id === userId);
+        user.avatarUrl = result.url;
+        saveUser(user);
+        fetchUsers();
+      } catch (err) {
+        alert("Avatar upload failed.");
+      }
+    });
   });
 }
 
@@ -91,7 +126,6 @@ function openMultiSelect(button, userId, type) {
     }));
 
     allOptions.unshift({ id: "", name: "— None —" });
-
     title.textContent = "Select Teacher(s)";
   }
 
@@ -118,8 +152,13 @@ function confirmMultiSelect() {
   const checks = document.querySelectorAll("#multiSelectOptions input[type='checkbox']");
   const values = Array.from(checks).filter(c => c.checked).map(c => c.value);
 
-  currentEditingRow[currentMultiType] = values.length > 1 ? values : values[0] || "";
-  currentMultiTarget.textContent = values.join(", ");
+  const cleaned =
+    values.length === 0 ? "" :
+    values.length === 1 ? values[0] :
+    values;
+
+  currentEditingRow[currentMultiType] = cleaned;
+  currentMultiTarget.textContent = formatTeacherNames(cleaned);
   saveUser(currentEditingRow);
   closeMultiSelectModal();
 }
@@ -135,10 +174,21 @@ function getUserFullNameById(userId) {
 
 function formatTeacherNames(teacherField) {
   if (Array.isArray(teacherField)) {
-    return teacherField.map(id => getUserFullNameById(id)).join(", ");
+    return teacherField.map(getTeacherNameFromValue).join(", ");
   } else {
-    return getUserFullNameById(teacherField);
+    return getTeacherNameFromValue(teacherField);
   }
+}
+
+function getTeacherNameFromValue(val) {
+  if (!val) return "No Teacher";
+  if (typeof val === "object") {
+    if (val.firstName && val.lastName) {
+      return `${val.firstName} ${val.lastName}`;
+    }
+    return "No Teacher";
+  }
+  return getUserFullNameById(val) || "No Teacher";
 }
 
 function getSortValue(user, column) {
@@ -192,7 +242,7 @@ function updateSortIndicators() {
     const col = th.getAttribute("data-column");
     if (!col) return;
 
-    th.textContent = th.textContent.replace(/[\u25B2\u25BC]/g, "").trim();
+    th.textContent = th.textContent.replace(/[▲▼]/g, "").trim();
 
     if (col === currentSortColumn) {
       const arrow = currentSortDirection === "asc" ? " ▲" : " ▼";

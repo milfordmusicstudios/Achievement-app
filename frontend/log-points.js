@@ -1,3 +1,4 @@
+
 // LOG POINTS JS
 
 let users = [];
@@ -5,6 +6,14 @@ let logs = [];
 
 const user = JSON.parse(localStorage.getItem("loggedInUser"));
 const activeRole = localStorage.getItem("activeRole") || "student";
+
+const categories = [
+  "Practice",
+  "Participation",
+  "Performance",
+  "Improvement",
+  "Teamwork"
+];
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -17,7 +26,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!user) return;
     const studentSelector = document.getElementById("logStudent");
     const logForm = document.getElementById("logForm");
-const studentRow = document.getElementById("studentSelectGroup");
+    const studentRow = document.getElementById("studentSelectGroup");
+
+    const categorySelect = document.getElementById("logCategory");
+    if (categorySelect && categorySelect.children.length === 0) {
+      categories.forEach(cat => {
+        const option = document.createElement("option");
+        option.value = cat;
+        option.textContent = cat;
+        categorySelect.appendChild(option);
+      });
+    }
 
     if (activeRole === "admin" || activeRole === "teacher") {
       const filtered = users.filter(u => {

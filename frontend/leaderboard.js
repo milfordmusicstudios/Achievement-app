@@ -98,7 +98,9 @@ if (
 if (user.avatarUrl) {
 avatar.src = `${BASE_UPLOAD}${user.avatarUrl}`;
 } else if (user.avatar) {
-  avatar.src = `Images/avatars/${user.avatar}.png`;
+avatar.src = user.avatarUrl
+  ? `${BASE_UPLOAD}${user.avatarUrl}`
+  : `${BASE_UPLOAD}/uploads/${user.avatar}.png`;
 } else {
   avatar.src = `Images/avatars/default.png`;
 }
