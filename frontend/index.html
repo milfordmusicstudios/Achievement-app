@@ -51,7 +51,7 @@
           return;
         }
 
-        fetch("http://10.0.0.220:3000/users")
+fetch(`${BASE_API}/users`)
           .then(res => res.json())
           .then(users => {
             const user = users.find(u =>

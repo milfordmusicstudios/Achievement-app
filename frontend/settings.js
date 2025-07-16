@@ -213,7 +213,7 @@ const res = await fetch(`${BASE_UPLOAD}/upload-avatar`, {
       if (!result.url) throw new Error("Upload failed");
 
       user.avatarUrl = result.url;
-      avatarImage.src = `http://10.0.0.220:3001${result.url}`;
+avatarImage.src = `${BASE_UPLOAD}${result.url}`;
 
       await fetch(`${BASE_API}/users/${user.id}`, {
         method: "PATCH",

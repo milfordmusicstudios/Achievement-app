@@ -40,9 +40,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Set default active role if multiple
-      const active = Array.isArray(selectedUser.role)
-        ? selectedUser.role[0]
-        : selectedUser.role;
+const active = Array.isArray(selectedUser.roles)
+  ? selectedUser.roles[0]
+  : selectedUser.roles;
 
       localStorage.setItem("loggedInUser", JSON.stringify(selectedUser));
       localStorage.setItem("activeRole", active);
