@@ -35,7 +35,7 @@
 
   <!-- ✅ Then initialize Supabase and handle login logic -->
   <script>
-    const supabase = supabase.createClient(
+    const client = supabase.createClient(
       'https://tpcjdgucyrqrzuqvshki.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTI1NTE2NzYsImV4cCI6MjAyODEyNzY3Nn0.SgMNQUtkg1iHw8cN4nsjzJBNFO8kCsnXZUgS9T7xWvA'
     );
@@ -57,7 +57,7 @@
         }
 
         try {
-          const { data: users, error } = await supabase.from("users").select("*");
+          const { data: users, error } = await client.from("users").select("*");
           if (error) throw error;
 
           const user = users.find(u =>
