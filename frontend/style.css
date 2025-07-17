@@ -1281,7 +1281,7 @@ body.faq-page {
 
 /* ✅ Background image for tall pages */
 body.tall-background {
-  background-image: url("images/background/tallBackground.png");
+  background-image: url("images/background/tallbackground.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
