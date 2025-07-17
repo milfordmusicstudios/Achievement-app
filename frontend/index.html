@@ -30,14 +30,12 @@
     &copy; 2025 Milford Music Studios Achievement App
   </footer>
 
-  <!-- ✅ Load Supabase library first -->
+  <!-- ✅ Supabase JS and client setup -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- ✅ Then initialize Supabase and handle login logic -->
   <script>
     const client = supabase.createClient(
       'https://tpcjdgucyrqrzuqvshki.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTI1NTE2NzYsImV4cCI6MjAyODEyNzY3Nn0.SgMNQUtkg1iHw8cN4nsjzJBNFO8kCsnXZUgS9T7xWvA'
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MDE5OTksImV4cCI6MjA2ODI3Nzk5OX0.XGHcwyeTzYje6cjd3PHQrr7CyyEcaoRB4GyTYN1fDqo'
     );
 
     document.addEventListener("DOMContentLoaded", () => {
