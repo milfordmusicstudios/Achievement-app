@@ -9,7 +9,6 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MDE5OTksImV4cCI6MjA2ODI3Nzk5OX0.XGHcwyeTzYje6cjd3PHQrr7CyyEcaoRB4GyTYN1fDqo'
 );
 
-// Sample levels data (replace with your actual level structure if needed)
 const levels = [
   { level: 1, minPoints: 0, maxPoints: 9, badge: "Images/Badges/Level1.png" },
   { level: 2, minPoints: 10, maxPoints: 24, badge: "Images/Badges/Level2.png" },
@@ -27,26 +26,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   const user = getCurrentUser();
   if (!user) return (window.location.href = "index.html");
 
-  document.getElementById("welcomeText").textContent = `Welcome ${user.firstName}`;
-  document.getElementById("myPointsButton").style.display =
-    user.role.includes("student") ? "inline-block" : "none";
+  const welcomeEl = document.getElementById("welcomeTitle");
+  const avatarEl = document.getElementById("homeavatar");
+  const badgeEl = document.getElementById("homeBadge");
+  const progressBar = document.getElementById("homeProgressBar");
+  const percentEl = document.getElementById("homeProgressText");
+
+  if (welcomeEl) welcomeEl.textContent = `Welcome ${user.firstName}`;
 
   try {
-    // 🔹 Get avatar URL from Supabase Storage
-    const { data: avatarData } = supabase.storage.from("avatars").getPublicUrl(user.avatarUrl);
-    document.getElementById("bitmojiImg").src = avatarData.publicUrl;
+    // Get avatar image
+    if (user.avatarUrl) {
+      const { data: avatarData } = supabase.storage.from("avatars").getPublicUrl(user.avatarUrl);
+      if (avatarEl && avatarData?.publicUrl) {
+        avatarEl.src = avatarData.publicUrl;
+      }
+    }
 
-    // 🔹 Get logs
+    // Get logs
     const { data: logs, error } = await supabase.from("logs").select("*");
     if (error) throw error;
 
-    // 🔹 Calculate user level
     const { level, percent } = calculateUserLevel(user.id, logs, levels);
 
-    document.getElementById("levelBadge").src = level.badge;
-    document.getElementById("levelText").textContent = `Level ${level.level}`;
-    document.getElementById("progressFill").style.width = `${percent}%`;
-    document.getElementById("percentText").textContent = `${percent}%`;
+    if (badgeEl) badgeEl.src = level.badge;
+    if (progressBar) progressBar.style.width = `${percent}%`;
+    if (percentEl) percentEl.textContent = `${percent}% to next level`;
   } catch (err) {
     console.error("Home page error:", err.message || err);
   }
