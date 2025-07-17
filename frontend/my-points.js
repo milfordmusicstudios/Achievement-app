@@ -13,13 +13,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     return;
   }
 
-  // 🔹 Fetch logs
+  // 🔹 Fetch logs from Supabase
   let logs = [];
   try {
-    const response = await fetch(`${BASE_API}/logs`);
-    logs = await response.json();
+    const { data, error } = await supabase.from("logs").select("*");
+    if (error) throw error;
+    logs = data;
   } catch (error) {
-    console.error("Failed to load logs:", error);
+    console.error("Failed to load logs:", error.message);
     alert("Unable to load your logs. Try again later.");
     return;
   }
@@ -31,9 +32,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   // 🔹 Avatar (optional)
   const avatarEl = document.getElementById("myPointsAvatar");
   if (avatarEl) {
-    avatarEl.src = user.avatarUrl
-      ? `${BASE_UPLOAD}${user.avatarUrl}`
-      : `Images/avatars/${user.avatar || "default"}.png`;
+    const { data: avatarData } = supabase
+      .storage
+      .from("avatars")
+      .getPublicUrl(user.avatarUrl);
+    avatarEl.src = avatarData?.publicUrl || `Images/avatars/${user.avatar || "default"}.png`;
   }
 
   // 🔹 Filter logs for this user
@@ -67,20 +70,20 @@ document.addEventListener("DOMContentLoaded", async function () {
       `;
       summarySection.appendChild(div);
     });
-  // 🔹 Add total summary box
-const totalPoints = userLogs.reduce((sum, log) => sum + log.points, 0);
-const totalLogs = userLogs.length;
 
-const totalDiv = document.createElement("div");
-totalDiv.className = "category-summary";
-totalDiv.innerHTML = `
-  <img src="Images/Categories/AllCategories.png" alt="All Categories" />
-  <p><strong>All Categories</strong></p>
-  <p>Points: ${totalPoints}</p>
-  <p>Log Entries: ${totalLogs}</p>
-`;
-summarySection.appendChild(totalDiv);
+    // 🔹 Add total summary box
+    const totalPoints = userLogs.reduce((sum, log) => sum + log.points, 0);
+    const totalLogs = userLogs.length;
 
+    const totalDiv = document.createElement("div");
+    totalDiv.className = "category-summary";
+    totalDiv.innerHTML = `
+      <img src="Images/Categories/AllCategories.png" alt="All Categories" />
+      <p><strong>All Categories</strong></p>
+      <p>Points: ${totalPoints}</p>
+      <p>Log Entries: ${totalLogs}</p>
+    `;
+    summarySection.appendChild(totalDiv);
   }
 
   renderLogTable(); // 🔄 draw the log table
@@ -158,9 +161,8 @@ function updateSortArrows() {
       arrowEl.style.visibility = "visible";
     } else {
       arrowEl.textContent = "▲"; // neutral arrow for inactive columns
-      arrowEl.style.visibility = "visible"; // always show
-      arrowEl.style.opacity = "0.3"; // lightly dim inactive arrows (optional)
+      arrowEl.style.visibility = "visible";
+      arrowEl.style.opacity = "0.3";
     }
   });
 }
-v

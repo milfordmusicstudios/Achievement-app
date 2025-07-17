@@ -1,5 +1,4 @@
-
-// LOG POINTS JS
+// log-points.js
 
 let users = [];
 let logs = [];
@@ -17,21 +16,26 @@ const categories = [
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    const userRes = await fetch(`${BASE_API}/users`);
-    users = await userRes.json();
+    // Load users and logs from Supabase
+    const [{ data: usersData, error: userError }, { data: logsData, error: logsError }] = await Promise.all([
+      supabase.from("users").select("*"),
+      supabase.from("logs").select("*")
+    ]);
 
-    const logsRes = await fetch(`${BASE_API}/logs`);
-    logs = await logsRes.json();
+    if (userError || logsError) throw userError || logsError;
+
+    users = usersData;
+    logs = logsData;
 
     if (!user) return;
+
     const studentSelector = document.getElementById("logStudent");
     const logForm = document.getElementById("logForm");
     const studentRow = document.getElementById("studentSelectGroup");
 
     const categorySelect = document.getElementById("logCategory");
-    console.log("Category select found:", categorySelect);
-    console.log("Categories to add:", categories);
 
+    // Populate category dropdown
     if (categorySelect && categorySelect.children.length <= 1) {
       categories.forEach(cat => {
         const option = document.createElement("option");
@@ -41,6 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
 
+    // Show student selector for admin/teacher
     if (activeRole === "admin" || activeRole === "teacher") {
       const filtered = users.filter(u => {
         if (!u.role && !u.roles) return false;
@@ -66,6 +71,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       studentRow.style.display = "none";
     }
 
+    // Handle form submission
     logForm.addEventListener("submit", async e => {
       e.preventDefault();
       const formData = new FormData(logForm);
@@ -75,18 +81,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         date: new Date().toISOString().split("T")[0],
         category: formData.get("category"),
         points: parseInt(formData.get("points")),
-        note: formData.get("note") || ""
+        note: formData.get("note") || "",
+        status: "pending"
       };
 
-      await fetch(`${BASE_API}/logs`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(log)
-      });
+      try {
+        const { error } = await supabase.from("logs").insert([log]);
+        if (error) throw error;
 
-      alert("Points logged!");
-      logForm.reset();
-      if (studentSelector) studentSelector.selectedIndex = 0;
+        alert("Points logged!");
+        logForm.reset();
+        if (studentSelector) studentSelector.selectedIndex = 0;
+      } catch (err) {
+        console.error("Error submitting log:", err);
+        alert("Failed to submit log.");
+      }
     });
 
   } catch (err) {

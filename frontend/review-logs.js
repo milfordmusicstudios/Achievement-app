@@ -21,13 +21,15 @@ let teacherStudentIds = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    const [logRes, userRes] = await Promise.all([
-      fetch(`${BASE_API}/logs`),
-      fetch(`${BASE_API}/users`)
-    ]);
+const [{ data: logsData, error: logsError }, { data: usersData, error: usersError }] = await Promise.all([
+  supabase.from("logs").select("*"),
+  supabase.from("users").select("*")
+]);
 
-    logs = await logRes.json();
-    users = await userRes.json();
+if (logsError || usersError) throw logsError || usersError;
+
+logs = logsData;
+users = usersData;
 
     if (activeRole === "teacher") {
       teacherStudentIds = users
@@ -175,11 +177,12 @@ async function updateLogField(logId, field, value) {
   };
 
   try {
-    const res = await fetch(`${BASE_API}/logs/${logId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+const { error } = await supabase
+  .from("logs")
+  .update(payload)
+  .eq("id", logId);
+
+if (error) throw error;
 
     if (!res.ok) {
       const errText = await res.text();

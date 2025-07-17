@@ -1,5 +1,5 @@
+// manage-users.js
 
-// MANAGE USERS JS
 let allUsers = [];
 let currentEditingRow = null;
 let currentMultiTarget = null;
@@ -14,8 +14,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function fetchUsers() {
-  const res = await fetch(`${BASE_API}/users`);
-  allUsers = await res.json();
+  const { data, error } = await supabase.from("users").select("*");
+  if (error) {
+    console.error("Error loading users:", error.message);
+    return;
+  }
+  allUsers = data;
   sortUsersBy("lastName");
 }
 
@@ -26,6 +30,10 @@ function renderUserTable() {
   allUsers.forEach(user => {
     const tr = document.createElement("tr");
 
+    const avatarPath = user.avatarUrl || `uploads/${user.avatar || "default"}.png`;
+    const { data: avatarData } = supabase.storage.from("avatars").getPublicUrl(avatarPath);
+    const avatarUrl = avatarData?.publicUrl || `Images/avatars/default.png`;
+
     tr.innerHTML = `
       <td><input value="${user.firstName || ""}" onchange="editUser(this, '${user.id}', 'firstName')" /></td>
       <td><input value="${user.lastName || ""}" onchange="editUser(this, '${user.id}', 'lastName')" /></td>
@@ -33,8 +41,7 @@ function renderUserTable() {
       <td><input value="${user.email || ""}" onchange="editUser(this, '${user.id}', 'email')" /></td>
       <td><input value="${user.password || ""}" onchange="editUser(this, '${user.id}', 'password')" /></td>
       <td>
-        <img src="${user.avatarUrl ? `${BASE_UPLOAD}${user.avatarUrl}` : `${BASE_UPLOAD}/uploads/${user.avatar || 'default'}.png`}" 
-             alt="Avatar" style="max-height: 40px; border-radius: 6px;" />
+        <img src="${avatarUrl}" alt="Avatar" style="max-height: 40px; border-radius: 6px;" />
         <input type="file" data-user-id="${user.id}" class="avatar-upload" style="display:block;margin-top:4px;" />
       </td>
       <td><button class="blue-button" onclick="openMultiSelect(this, '${user.id}', 'role')">${formatArray(user.roles || user.role)}</button></td>
@@ -55,22 +62,29 @@ function setupAvatarUploadHandlers() {
       const file = e.target.files[0];
       if (!file) return;
 
-      const formData = new FormData();
-      formData.append("avatar", file);
+      const filePath = `public/${userId}/${file.name}`;
 
       try {
-        const res = await fetch(`${BASE_UPLOAD}/upload-avatar`, {
-          method: "POST",
-          body: formData
-        });
-        const result = await res.json();
-        if (!result.url) throw new Error("Upload failed");
+        const { error: uploadError } = await supabase
+          .storage
+          .from("avatars")
+          .upload(filePath, file, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { error: updateError } = await supabase
+          .from("users")
+          .update({ avatarUrl: filePath })
+          .eq("id", userId);
+
+        if (updateError) throw updateError;
 
         const user = allUsers.find(u => u.id === userId);
-        user.avatarUrl = result.url;
+        user.avatarUrl = filePath;
         saveUser(user);
         fetchUsers();
       } catch (err) {
+        console.error("Avatar upload failed:", err);
         alert("Avatar upload failed.");
       }
     });
@@ -90,12 +104,17 @@ function editUser(input, id, field) {
   saveUser(user);
 }
 
-function saveUser(user) {
-  fetch(`${BASE_API}/users/${user.id}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(user),
-  }).catch(err => console.error("Save error:", err));
+async function saveUser(user) {
+  try {
+    const { error } = await supabase
+      .from("users")
+      .update(user)
+      .eq("id", user.id);
+    if (error) throw error;
+  } catch (err) {
+    console.error("Save error:", err);
+    alert("Failed to save user.");
+  }
 }
 
 function openMultiSelect(button, userId, type) {

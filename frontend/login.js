@@ -1,16 +1,13 @@
+// login.js
 // Must be included AFTER config.js is loaded
-// Example usage:
-fetch(`${BASE_API}/users`)
-//img.src = `${BASE_UPLOAD}${user.avatarUrl}`;
-
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById('loginForm');
   const errorDisplay = document.getElementById('loginError');
 
-  if (!form) return; // Prevents this code from running on other pages
+  if (!form) return;
 
-  form.addEventListener('submit', function (e) {
+  form.addEventListener('submit', async function (e) {
     e.preventDefault();
 
     const email = document.getElementById('loginEmail')?.value.trim().toLowerCase();
@@ -22,38 +19,42 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    fetch(`${BASE_API}/users`)
-      .then(res => res.json())
-      .then(users => {
-        const user = users.find(u => u.email?.toLowerCase() === email && u.password === password);
+    try {
+      const { data: users, error } = await supabase.from("users").select("*");
 
-        if (user) {
-          localStorage.setItem("loggedInUser", JSON.stringify(user));
+      if (error) throw error;
 
-          // ✅ Determine default role from roles or role field
-          let rawRoles = user.roles || user.role || [];
-          let roleList = Array.isArray(rawRoles) ? rawRoles : [rawRoles];
-          roleList = roleList.map(r => r.toLowerCase());
+      const user = users.find(u =>
+        u.email?.toLowerCase() === email &&
+        u.password === password
+      );
 
-          let defaultRole = "student";
-          if (roleList.includes("admin")) {
-            defaultRole = "admin";
-          } else if (roleList.includes("teacher")) {
-            defaultRole = "teacher";
-          }
+      if (user) {
+        localStorage.setItem("loggedInUser", JSON.stringify(user));
 
-          localStorage.setItem("activeRole", defaultRole);
+        // ✅ Determine default role from roles or role field
+        let rawRoles = user.roles || user.role || [];
+        let roleList = Array.isArray(rawRoles) ? rawRoles : [rawRoles];
+        roleList = roleList.map(r => r.toLowerCase());
 
-          window.location.href = 'home.html';
-        } else {
-          errorDisplay.style.display = 'block';
-          errorDisplay.textContent = 'Invalid email or password.';
+        let defaultRole = "student";
+        if (roleList.includes("admin")) {
+          defaultRole = "admin";
+        } else if (roleList.includes("teacher")) {
+          defaultRole = "teacher";
         }
-      })
-      .catch(err => {
-        console.error("Login error:", err);
+
+        localStorage.setItem("activeRole", defaultRole);
+        window.location.href = 'home.html';
+      } else {
         errorDisplay.style.display = 'block';
-        errorDisplay.textContent = 'Server error. Please try again.';
-      });
+        errorDisplay.textContent = 'Invalid email or password.';
+      }
+
+    } catch (err) {
+      console.error("Login error:", err);
+      errorDisplay.style.display = 'block';
+      errorDisplay.textContent = 'Server error. Please try again.';
+    }
   });
 });

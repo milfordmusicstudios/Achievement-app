@@ -9,8 +9,11 @@ window.addEventListener("DOMContentLoaded", async () => {
   const teacherSelect = document.getElementById("teacher");
 
   try {
-    const res = await fetch(`${BASE_API}/users`);
-    const users = await res.json();
+const { data: users, error } = await supabase
+  .from("users")
+  .select("*");
+
+if (error) throw error;
 
 const teacherUsers = users.filter(user => {
 const roles = Array.isArray(user.roles)
@@ -88,36 +91,31 @@ const newUser = {
   createdAt: new Date().toISOString()
 };
 
-  try {
-const res = await fetch(`${BASE_API}/users`, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(newUser)
-    });
+try {
+  const { data, error } = await supabase
+    .from("users")
+    .insert([newUser]);
 
-if (res.ok) {
-  const newUser = await res.json();
+  if (error) {
+    console.error("Signup failed:", error.message);
+    showError("Signup failed: " + error.message);
+    return;
+  }
 
-  // Set localStorage just like login does
-  localStorage.setItem("loggedInUser", JSON.stringify(newUser));
+  const createdUser = data[0]; // renamed to avoid shadowing
+  localStorage.setItem("loggedInUser", JSON.stringify(createdUser));
 
-  // Determine active role (default to first one if it's an array)
-  const activeRole = Array.isArray(newUser.role || newUser.roles)
-    ? (newUser.role || newUser.roles)[0]
-    : (newUser.role || newUser.roles || "student");
+  const activeRole = Array.isArray(createdUser.role || createdUser.roles)
+    ? (createdUser.role || createdUser.roles)[0]
+    : (createdUser.role || createdUser.roles || "student");
 
   localStorage.setItem("activeRole", activeRole);
-
-  // Redirect to home page
   window.location.href = "home.html";
-    } else {
-      const error = await res.text();
-      showError("Signup failed: " + error);
-    }
-  } catch (err) {
-    console.error("Signup error:", err);
-    showError("Something went wrong. Please try again.");
-  }
+
+} catch (err) {
+  console.error("Signup error:", err);
+  showError("Something went wrong. Please try again.");
+}
 });
 
 function showError(message) {

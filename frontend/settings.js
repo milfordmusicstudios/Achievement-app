@@ -1,8 +1,6 @@
+// settings.js
 // Must be included AFTER config.js is loaded
-// Example usage:
-fetch(`${BASE_API}/users`)
-//img.src = `${BASE_UPLOAD}${user.avatarUrl}`;
-
+// Supabase is expected to be imported from config.js
 
 // Global helper
 function capitalize(str) {
@@ -37,23 +35,23 @@ function promptUserSwitch() {
     }
 
     btn.textContent = `${u.firstName} ${u.lastName}${roleText}`;
-btn.onclick = () => {
-  localStorage.setItem("loggedInUser", JSON.stringify(u));
+    btn.onclick = () => {
+      localStorage.setItem("loggedInUser", JSON.stringify(u));
 
-  let rawRoles = u.roles || u.role || [];
-  let roleList = Array.isArray(rawRoles) ? rawRoles : [rawRoles];
-  roleList = roleList.map(r => r.toLowerCase());
+      let rawRoles = u.roles || u.role || [];
+      let roleList = Array.isArray(rawRoles) ? rawRoles : [rawRoles];
+      roleList = roleList.map(r => r.toLowerCase());
 
-  let defaultRole = "student";
-  if (roleList.includes("admin")) {
-    defaultRole = "admin";
-  } else if (roleList.includes("teacher")) {
-    defaultRole = "teacher";
-  }
+      let defaultRole = "student";
+      if (roleList.includes("admin")) {
+        defaultRole = "admin";
+      } else if (roleList.includes("teacher")) {
+        defaultRole = "teacher";
+      }
 
-  localStorage.setItem("activeRole", defaultRole);
-  window.location.href = "home.html";
-};
+      localStorage.setItem("activeRole", defaultRole);
+      window.location.href = "home.html";
+    };
 
     li.appendChild(btn);
     listContainer.appendChild(li);
@@ -64,7 +62,9 @@ btn.onclick = () => {
 
 function promptRoleSwitch() {
   const user = JSON.parse(localStorage.getItem("loggedInUser"));
-  const roleList = Array.isArray(user.roles) ? user.roles : (Array.isArray(user.role) ? user.role : [user.role]);
+  const roleList = Array.isArray(user.roles)
+    ? user.roles
+    : (Array.isArray(user.role) ? user.role : [user.role]);
 
   const listContainer = document.getElementById("roleSwitchList");
   listContainer.innerHTML = "";
@@ -94,7 +94,6 @@ function closeRoleSwitchModal() {
   document.getElementById("roleSwitchModal").style.display = "none";
 }
 
-// Save settings
 async function saveSettings() {
   const user = JSON.parse(localStorage.getItem("loggedInUser"));
   const updatedUser = {
@@ -110,16 +109,12 @@ async function saveSettings() {
   if (newPassword) updatedUser.password = newPassword;
 
   try {
-const res = await fetch(`${BASE_API}/users/${user.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedUser)
-    });
+    const { error } = await supabase
+      .from("users")
+      .update(updatedUser)
+      .eq("id", user.id);
 
-if (!res.ok) {
-  const errText = await res.text();
-  throw new Error(`Failed to save. Server responded: ${errText}`);
-}
+    if (error) throw error;
 
     localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
 
@@ -139,7 +134,6 @@ function handleLogout() {
   window.location.href = "index.html";
 }
 
-// DOM Loaded
 document.addEventListener("DOMContentLoaded", async () => {
   const user = JSON.parse(localStorage.getItem('loggedInUser'));
   const activeRole = localStorage.getItem("activeRole");
@@ -154,13 +148,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById('newEmail').value = user.email || '';
 
   const avatarImage = document.getElementById('avatarImage');
-if (user.avatarUrl) {
-  avatarImage.src = `${BASE_UPLOAD}${user.avatarUrl}`;
-} else if (user.avatar) {
-avatarImage.src = `${BASE_UPLOAD}/uploads/${user.avatar}.png`;
-} else {
-  avatarImage.src = `Images/avatars/default.png`;
-}
+  if (user.avatarUrl) {
+    const { data } = supabase.storage.from("avatars").getPublicUrl(user.avatarUrl);
+    avatarImage.src = data?.publicUrl || `Images/avatars/default.png`;
+  } else {
+    avatarImage.src = `Images/avatars/default.png`;
+  }
 
   const switchRoleBtn = document.getElementById("switchRoleBtn");
   const switchUserBtn = document.getElementById("switchUserBtn");
@@ -177,8 +170,8 @@ avatarImage.src = `${BASE_UPLOAD}/uploads/${user.avatar}.png`;
   }
 
   try {
-    const res = await fetch(`${BASE_API}/users`);
-    allUsers = await res.json();
+    const { data, error } = await supabase.from("users").select("*");
+    if (!error) allUsers = data;
   } catch {
     console.warn("Unable to load users for switch-user check.");
   }
@@ -193,33 +186,34 @@ avatarImage.src = `${BASE_UPLOAD}/uploads/${user.avatar}.png`;
     switchUserBtn.style.display = "inline-block";
   }
 
-  // Avatar upload
   const avatarInput = document.getElementById("avatarInput");
   avatarImage.addEventListener("click", () => avatarInput.click());
   avatarInput.addEventListener("change", async () => {
     const file = avatarInput.files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("avatar", file);
-    formData.append("userId", user.id);
-
     try {
-const res = await fetch(`${BASE_UPLOAD}/upload-avatar`, {
-        method: "POST",
-        body: formData
-      });
-      const result = await res.json();
-      if (!result.url) throw new Error("Upload failed");
+      const path = `public/${user.id}/${file.name}`;
 
-      user.avatarUrl = result.url;
-avatarImage.src = `${BASE_UPLOAD}${result.url}`;
+      const { error: uploadError } = await supabase
+        .storage
+        .from("avatars")
+        .upload(path, file, { upsert: true });
 
-      await fetch(`${BASE_API}/users/${user.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ avatarUrl: result.url })
-      });
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      const publicUrl = data?.publicUrl;
+
+      user.avatarUrl = path;
+      avatarImage.src = publicUrl;
+
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({ avatarUrl: path })
+        .eq("id", user.id);
+
+      if (updateError) throw updateError;
 
       localStorage.setItem("loggedInUser", JSON.stringify(user));
     } catch (err) {
