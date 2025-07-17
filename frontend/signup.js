@@ -1,3 +1,14 @@
+// signup.js
+
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+const supabase = createClient(
+  'https://tpcjdgucyrqrzuqvshki.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MDE5OTksImV4cCI6MjA2ODI3Nzk5OX0.XGHcwyeTzYje6cjd3PHQrr7CyyEcaoRB4GyTYN1fDqo'
+);
+
+// The rest of the original signup.js remains unchanged because it already connects correctly to Supabase.
+
 // Must be included AFTER config.js is loaded
 // Example usage:
 fetch(`${BASE_API}/users`)

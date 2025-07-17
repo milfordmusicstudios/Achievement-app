@@ -1,195 +1,98 @@
-// Must be included AFTER config.js is loaded
-// Example usage:
-fetch(`${BASE_API}/users`)
+// review-logs.js
 
-const user = JSON.parse(localStorage.getItem("loggedInUser"));
-const activeRole = localStorage.getItem("activeRole");
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+import { getCurrentUser } from './auth.js';
 
-if (!user || !["admin", "teacher"].includes(activeRole)) {
-  alert("You are not authorized to view this page.");
-  window.location.href = "home.html";
-}
+const supabase = createClient(
+  'https://tpcjdgucyrqrzuqvshki.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MDE5OTksImV4cCI6MjA2ODI3Nzk5OX0.XGHcwyeTzYje6cjd3PHQrr7CyyEcaoRB4GyTYN1fDqo'
+);
 
-let logs = [];
-let users = [];
-let currentSortField = "date";
-let currentSortOrder = "desc";
-
-let teacherStudentIds = [];
-
-// Load and filter data
+const categories = ["Practice", "Participation", "Performance", "Improvement", "Teamwork"];
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const user = getCurrentUser();
+  if (!user || (!user.role?.includes("admin") && !user.role?.includes("teacher"))) {
+    window.location.href = "index.html";
+    return;
+  }
+
   try {
-const [{ data: logsData, error: logsError }, { data: usersData, error: usersError }] = await Promise.all([
-  supabase.from("logs").select("*"),
-  supabase.from("users").select("*")
-]);
+    const [userResult, logResult] = await Promise.all([
+      supabase.from("users").select("*"),
+      supabase.from("logs").select("*")
+    ]);
 
-if (logsError || usersError) throw logsError || usersError;
-
-logs = logsData;
-users = usersData;
-
-    if (activeRole === "teacher") {
-      teacherStudentIds = users
-        .filter(u => {
-          const roles = u.roles || u.role || [];
-          const roleList = Array.isArray(roles) ? roles : [roles];
-          if (!roleList.includes("student")) return false;
-
-          const teacherField = u.teacher || u.teachers || [];
-          const teacherList = Array.isArray(teacherField) ? teacherField : [teacherField];
-          return teacherList.includes(user.id);
-        })
-        .map(u => u.id);
+    if (userResult.error || logResult.error) {
+      throw userResult.error || logResult.error;
     }
 
-    renderCategorySummaries();
-    sortLogsBy("date");
+    const users = userResult.data;
+    const logs = logResult.data;
+
+    const tableBody = document.getElementById("reviewLogTableBody");
+    const summaryDiv = document.getElementById("categorySummary");
+
+    // Category summary
+    const summary = {};
+    categories.forEach(cat => (summary[cat] = { count: 0, points: 0 }));
+
+    logs.forEach(log => {
+      if (summary[log.category]) {
+        summary[log.category].count++;
+        summary[log.category].points += log.points;
+      }
+    });
+
+    for (const category of categories) {
+      const div = document.createElement("div");
+      div.className = "category-summary";
+      div.innerHTML = `
+        <img src="Images/Categories/${category}.png" alt="${category}" />
+        <div><strong>${category}</strong><br>Logs: ${summary[category].count}<br>Points: ${summary[category].points}</div>
+      `;
+      summaryDiv.appendChild(div);
+    }
+
+    // Table
+    const userMap = {};
+    users.forEach(u => {
+      userMap[u.id] = `${u.firstName} ${u.lastName}`;
+    });
+
+    logs.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(log => {
+      const row = document.createElement("tr");
+
+      const userCell = document.createElement("td");
+      userCell.textContent = userMap[log.user] || log.user;
+
+      const categoryCell = document.createElement("td");
+      categoryCell.textContent = log.category;
+
+      const pointsCell = document.createElement("td");
+      pointsCell.textContent = log.points;
+
+      const noteCell = document.createElement("td");
+      noteCell.textContent = log.note || "";
+
+      const dateCell = document.createElement("td");
+      dateCell.textContent = new Date(log.date).toLocaleDateString();
+
+      const statusCell = document.createElement("td");
+      statusCell.textContent = log.status || "Pending";
+
+      row.appendChild(userCell);
+      row.appendChild(categoryCell);
+      row.appendChild(pointsCell);
+      row.appendChild(noteCell);
+      row.appendChild(dateCell);
+      row.appendChild(statusCell);
+
+      tableBody.appendChild(row);
+    });
+
   } catch (err) {
-    console.error("Error loading logs or users:", err);
-    alert("Unable to load logs. Please try again later.");
+    console.error("Error loading review logs:", err);
+    alert("Failed to load review logs.");
   }
 });
-
-function renderCategorySummaries() {
-  const categoryStats = {};
-  logs.forEach(log => {
-    if (activeRole === "teacher" && !teacherStudentIds.includes(log.user)) return;
-    const cat = log.category.toLowerCase();
-    if (!categoryStats[cat]) {
-      categoryStats[cat] = { points: 0, entries: 0 };
-    }
-    categoryStats[cat].points += log.points;
-    categoryStats[cat].entries += 1;
-  });
-
-  const wrapper = document.getElementById("categorySummaries");
-  wrapper.innerHTML = "";
-  categories.forEach(cat => {
-    const stat = categoryStats[cat.name.toLowerCase()] || { points: 0, entries: 0 };
-    const div = document.createElement("div");
-    div.className = "category-summary";
-    div.innerHTML = `
-      <img src="Images/Categories/${cat.icon}" alt="${cat.name}" />
-      <p><strong>${cat.name}</strong></p>
-      <p>Points: ${stat.points}</p>
-      <p>Logs: ${stat.entries}</p>
-    `;
-    wrapper.appendChild(div);
-  });
-}
-
-function sortLogsBy(field) {
-  const tableHeadings = document.querySelectorAll("th");
-  tableHeadings.forEach(th => {
-    th.innerHTML = th.textContent.split(" ")[0];
-  });
-
-  if (currentSortField === field) {
-    currentSortOrder = currentSortOrder === "asc" ? "desc" : "asc";
-  } else {
-    currentSortField = field;
-    currentSortOrder = "asc";
-  }
-
-  logs.sort((a, b) => {
-    let aVal = a[field] || "";
-    let bVal = b[field] || "";
-
-    if (field === "date") {
-      aVal = new Date(aVal);
-      bVal = new Date(bVal);
-    } else if (field === "points") {
-      aVal = parseInt(aVal, 10) || 0;
-      bVal = parseInt(bVal, 10) || 0;
-    } else if (field === "status") {
-      const statusOrder = {
-        "approved": 1,
-        "pending": 2,
-        "not approved": 3,
-        "needs info": 4
-      };
-      aVal = statusOrder[aVal.toLowerCase()] || 999;
-      bVal = statusOrder[bVal.toLowerCase()] || 999;
-    } else {
-      aVal = aVal.toString().toLowerCase();
-      bVal = bVal.toString().toLowerCase();
-    }
-
-    if (aVal < bVal) return currentSortOrder === "asc" ? -1 : 1;
-    if (aVal > bVal) return currentSortOrder === "asc" ? 1 : -1;
-    return 0;
-  });
-
-  const sortArrow = currentSortOrder === "asc" ? " ▲" : " ▼";
-  const activeHeader = document.querySelector(`th[onclick*="${field}"]`);
-  if (activeHeader) activeHeader.innerHTML = activeHeader.textContent.trim() + sortArrow;
-
-  renderReviewTable();
-}
-
-function renderReviewTable() {
-  const tbody = document.getElementById("reviewTableBody");
-  tbody.innerHTML = "";
-
-  logs.forEach(log => {
-    if (!log.id) return;
-    if (activeRole === "teacher" && !teacherStudentIds.includes(log.user)) return;
-
-    const userObj = users.find(u => u.id === log.user);
-    const fullName = userObj ? `${userObj.firstName} ${userObj.lastName}` : log.user;
-
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td class="user-cell">${fullName}</td>
-      <td><input class="category-input" value="${log.category}" data-id="${log.id}" /></td>
-      <td><input class="points-input" type="number" value="${log.points}" data-id="${log.id}" /></td>
-      <td><input class="note-input" value="${log.note || ""}" data-id="${log.id}" /></td>
-      <td><input class="date-input" type="date" value="${log.date}" data-id="${log.id}" /></td>
-      <td>
-        <select class="status-input" data-id="${log.id}">
-          <option value="pending" ${log.status === "pending" ? "selected" : ""}>Pending</option>
-          <option value="approved" ${log.status === "approved" ? "selected" : ""}>Approved</option>
-          <option value="not approved" ${log.status === "not approved" ? "selected" : ""}>Not Approved</option>
-          <option value="needs info" ${log.status === "needs info" ? "selected" : ""}>Needs Info</option>
-        </select>
-      </td>
-    `;
-
-    tbody.appendChild(row);
-  });
-
-  tbody.querySelectorAll("input, select").forEach(el => {
-    el.addEventListener("change", () => {
-      const logId = el.dataset.id;
-      const field = el.className.split("-")[0];
-      if (!logId || !field) return;
-      updateLogField(logId, field, el.value);
-    });
-  });
-}
-
-async function updateLogField(logId, field, value) {
-  const payload = {
-    [field]: field === "points" ? parseInt(value, 10) : value
-  };
-
-  try {
-const { error } = await supabase
-  .from("logs")
-  .update(payload)
-  .eq("id", logId);
-
-if (error) throw error;
-
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(`Server responded ${res.status}: ${errText}`);
-    }
-  } catch (err) {
-    console.error(`❌ Failed to update ${field} for log ${logId}:`, err);
-    alert("Error updating log. Please try again.");
-  }
-}

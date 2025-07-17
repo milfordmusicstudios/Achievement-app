@@ -1,5 +1,12 @@
 // log-points.js
 
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+const supabase = createClient(
+  'https://tpcjdgucyrqrzuqvshki.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MDE5OTksImV4cCI6MjA2ODI3Nzk5OX0.XGHcwyeTzYje6cjd3PHQrr7CyyEcaoRB4GyTYN1fDqo'
+);
+
 let users = [];
 let logs = [];
 
@@ -16,7 +23,6 @@ const categories = [
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    // Load users and logs from Supabase
     const [{ data: usersData, error: userError }, { data: logsData, error: logsError }] = await Promise.all([
       supabase.from("users").select("*"),
       supabase.from("logs").select("*")
@@ -32,10 +38,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const studentSelector = document.getElementById("logStudent");
     const logForm = document.getElementById("logForm");
     const studentRow = document.getElementById("studentSelectGroup");
-
     const categorySelect = document.getElementById("logCategory");
 
-    // Populate category dropdown
     if (categorySelect && categorySelect.children.length <= 1) {
       categories.forEach(cat => {
         const option = document.createElement("option");
@@ -45,10 +49,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
 
-    // Show student selector for admin/teacher
     if (activeRole === "admin" || activeRole === "teacher") {
       const filtered = users.filter(u => {
-        if (!u.role && !u.roles) return false;
         const roleList = Array.isArray(u.roles || u.role) ? u.roles || u.role : [u.roles || u.role];
         const isStudent = roleList.includes("student");
         const teaches = Array.isArray(u.teacher)
@@ -71,7 +73,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       studentRow.style.display = "none";
     }
 
-    // Handle form submission
     logForm.addEventListener("submit", async e => {
       e.preventDefault();
       const formData = new FormData(logForm);

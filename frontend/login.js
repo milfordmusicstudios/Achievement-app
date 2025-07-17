@@ -1,5 +1,11 @@
 // login.js
-// Must be included AFTER config.js is loaded
+
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+const supabase = createClient(
+  'https://tpcjdgucyrqrzuqvshki.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MDE5OTksImV4cCI6MjA2ODI3Nzk5OX0.XGHcwyeTzYje6cjd3PHQrr7CyyEcaoRB4GyTYN1fDqo'
+);
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById('loginForm');
@@ -21,7 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const { data: users, error } = await supabase.from("users").select("*");
-
       if (error) throw error;
 
       const user = users.find(u =>
@@ -32,17 +37,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if (user) {
         localStorage.setItem("loggedInUser", JSON.stringify(user));
 
-        // ✅ Determine default role from roles or role field
         let rawRoles = user.roles || user.role || [];
         let roleList = Array.isArray(rawRoles) ? rawRoles : [rawRoles];
         roleList = roleList.map(r => r.toLowerCase());
 
         let defaultRole = "student";
-        if (roleList.includes("admin")) {
-          defaultRole = "admin";
-        } else if (roleList.includes("teacher")) {
-          defaultRole = "teacher";
-        }
+        if (roleList.includes("admin")) defaultRole = "admin";
+        else if (roleList.includes("teacher")) defaultRole = "teacher";
 
         localStorage.setItem("activeRole", defaultRole);
         window.location.href = 'home.html';
@@ -50,7 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
         errorDisplay.style.display = 'block';
         errorDisplay.textContent = 'Invalid email or password.';
       }
-
     } catch (err) {
       console.error("Login error:", err);
       errorDisplay.style.display = 'block';

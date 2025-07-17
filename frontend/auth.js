@@ -1,64 +1,26 @@
-// Must be included AFTER config.js is loaded
-// Example usage:
-fetch(`${BASE_API}/users`)
-//img.src = `${BASE_UPLOAD}${user.avatarUrl}`;
+// auth.js
 
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-document.addEventListener("DOMContentLoaded", () => {
-  const loginForm = document.getElementById("loginForm");
-  if (!loginForm) return;
+const supabase = createClient(
+  'https://tpcjdgucyrqrzuqvshki.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MDE5OTksImV4cCI6MjA2ODI3Nzk5OX0.XGHcwyeTzYje6cjd3PHQrr7CyyEcaoRB4GyTYN1fDqo'
+);
 
-  loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+// Get current logged-in user
+export function getCurrentUser() {
+  const user = localStorage.getItem("loggedInUser");
+  return user ? JSON.parse(user) : null;
+}
 
-    const email = document.getElementById("loginEmail").value.trim();
-    const password = document.getElementById("loginPassword").value;
+// Get the currently selected role (if user has multiple)
+export function getActiveRole() {
+  return localStorage.getItem("activeRole") || "student";
+}
 
-    try {
-      const res = await fetch(`${BASE_API}/users`);
-      const allUsers = await res.json();
-
-      const matchingUsers = allUsers.filter(
-        u => u.email === email && u.password === password
-      );
-
-      if (matchingUsers.length === 0) {
-        alert("Invalid email or password.");
-        return;
-      }
-
-      let selectedUser = matchingUsers[0];
-
-      if (matchingUsers.length > 1) {
-        const names = matchingUsers.map(u => `${u.firstName} ${u.lastName}`);
-        const nameChoice = prompt(`Multiple users share this email. Who are you?\n${names.join('\n')}`);
-        selectedUser = matchingUsers.find(u => `${u.firstName} ${u.lastName}` === nameChoice.trim());
-        if (!selectedUser) {
-          alert("Login cancelled.");
-          return;
-        }
-      }
-
-      // Set default active role if multiple
-const active = Array.isArray(selectedUser.roles)
-  ? selectedUser.roles[0]
-  : selectedUser.roles;
-
-      localStorage.setItem("loggedInUser", JSON.stringify(selectedUser));
-      localStorage.setItem("activeRole", active);
-
-      window.location.href = "home.html";
-
-    } catch (err) {
-      console.error("Login failed:", err);
-      alert("Login error. Try again later.");
-    }
-  });
-});
-
-// Logout function
-function handleLogout() {
+// Log out user
+export function logout() {
   localStorage.removeItem("loggedInUser");
   localStorage.removeItem("activeRole");
-  window.location.href = "login.html";
+  window.location.href = "index.html";
 }

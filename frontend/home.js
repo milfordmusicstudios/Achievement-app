@@ -1,97 +1,53 @@
 // home.js
-// Must be included AFTER config.js is loaded
+
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+import { getCurrentUser } from './auth.js';
+import { calculateUserLevel } from './utils.js';
+
+const supabase = createClient(
+  'https://tpcjdgucyrqrzuqvshki.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MDE5OTksImV4cCI6MjA2ODI3Nzk5OX0.XGHcwyeTzYje6cjd3PHQrr7CyyEcaoRB4GyTYN1fDqo'
+);
+
+// Sample levels data (replace with your actual level structure if needed)
+const levels = [
+  { level: 1, minPoints: 0, maxPoints: 9, badge: "Images/Badges/Level1.png" },
+  { level: 2, minPoints: 10, maxPoints: 24, badge: "Images/Badges/Level2.png" },
+  { level: 3, minPoints: 25, maxPoints: 49, badge: "Images/Badges/Level3.png" },
+  { level: 4, minPoints: 50, maxPoints: 74, badge: "Images/Badges/Level4.png" },
+  { level: 5, minPoints: 75, maxPoints: 99, badge: "Images/Badges/Level5.png" },
+  { level: 6, minPoints: 100, maxPoints: 149, badge: "Images/Badges/Level6.png" },
+  { level: 7, minPoints: 150, maxPoints: 199, badge: "Images/Badges/Level7.png" },
+  { level: 8, minPoints: 200, maxPoints: 299, badge: "Images/Badges/Level8.png" },
+  { level: 9, minPoints: 300, maxPoints: 499, badge: "Images/Badges/Level9.png" },
+  { level: 10, minPoints: 500, maxPoints: 99999, badge: "Images/Badges/Level10.png" },
+];
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const user = JSON.parse(localStorage.getItem("loggedInUser"));
-  let activeRole = localStorage.getItem("activeRole");
+  const user = getCurrentUser();
+  if (!user) return (window.location.href = "index.html");
 
-  if (!user) {
-    window.location.href = "login.html";
-    return;
-  }
-
-  // ✅ Force default role if missing or invalid
-  if (!activeRole || activeRole === "undefined") {
-    let rawRoles = user.roles || user.role || [];
-    let roleList = Array.isArray(rawRoles) ? rawRoles : [rawRoles];
-    roleList = roleList.map(r => r.toLowerCase());
-
-    if (roleList.includes("admin")) {
-      activeRole = "admin";
-    } else if (roleList.includes("teacher")) {
-      activeRole = "teacher";
-    } else {
-      activeRole = "student";
-    }
-    localStorage.setItem("activeRole", activeRole);
-  }
-
-  document.body.classList.add(`${activeRole}-mode`);
-
-  const myPointsBtn = document.getElementById("myPointsBtn");
-  if (activeRole !== "student" && myPointsBtn) {
-    myPointsBtn.style.display = "none";
-  }
+  document.getElementById("welcomeText").textContent = `Welcome ${user.firstName}`;
+  document.getElementById("myPointsButton").style.display =
+    user.role.includes("student") ? "inline-block" : "none";
 
   try {
+    // 🔹 Get avatar URL from Supabase Storage
+    const { data: avatarData } = supabase.storage.from("avatars").getPublicUrl(user.avatarUrl);
+    document.getElementById("bitmojiImg").src = avatarData.publicUrl;
+
+    // 🔹 Get logs
     const { data: logs, error } = await supabase.from("logs").select("*");
     if (error) throw error;
 
-    const { level, totalPoints, percent } = calculateUserLevel(user.id, logs, levels);
+    // 🔹 Calculate user level
+    const { level, percent } = calculateUserLevel(user.id, logs, levels);
 
-    localStorage.setItem("currentUser", JSON.stringify(user));
-    document.getElementById('welcomeTitle').textContent = `Welcome ${user.firstName}!`;
-
-    const { data: avatarData } = supabase.storage
-      .from("avatars")
-      .getPublicUrl(user.avatarUrl || `uploads/${user.avatar || "default"}.png`);
-
-    document.getElementById('homeavatar').src =
-      avatarData?.publicUrl || `Images/avatars/default.png`;
-
-    const badge = document.getElementById('homeBadge');
-    const progressCard = document.querySelector('.progress-card');
-    const progressText = document.getElementById('homeProgressText');
-
-    if (activeRole === "teacher") {
-      badge.src = "Images/LevelBadges/teacher.png";
-      progressCard.style.display = "none";
-      progressText.style.display = "none";
-    } else if (activeRole === "admin") {
-      badge.src = "Images/LevelBadges/admin.png";
-      progressCard.style.display = "none";
-      progressText.style.display = "none";
-    } else {
-      badge.src = level.badge;
-      document.getElementById('homeProgressBar').style.width = `${percent}%`;
-      document.getElementById('homeProgressBar').style.backgroundColor = level.color;
-      progressText.textContent = `${percent}% to next level`;
-      if (myPointsBtn) myPointsBtn.style.display = "inline-block";
-    }
-
-    const reviewLogsBtn = document.getElementById("reviewLogsBtn");
-    const manageUsersBtn = document.getElementById("manageUsersBtn");
-
-    if (activeRole === "admin") {
-      if (manageUsersBtn) manageUsersBtn.style.display = "inline-block";
-      if (reviewLogsBtn) reviewLogsBtn.style.display = "inline-block";
-    } else if (activeRole === "teacher") {
-      if (manageUsersBtn) manageUsersBtn.style.display = "none";
-      if (reviewLogsBtn) reviewLogsBtn.style.display = "inline-block";
-    } else {
-      if (manageUsersBtn) manageUsersBtn.style.display = "none";
-      if (reviewLogsBtn) reviewLogsBtn.style.display = "none";
-    }
-
-    user.level = level.name;
-    localStorage.setItem('loggedInUser', JSON.stringify(user));
-
-  } catch (error) {
-    console.error("Error fetching logs:", error);
-    alert("Unable to load points. Please try again.");
+    document.getElementById("levelBadge").src = level.badge;
+    document.getElementById("levelText").textContent = `Level ${level.level}`;
+    document.getElementById("progressFill").style.width = `${percent}%`;
+    document.getElementById("percentText").textContent = `${percent}%`;
+  } catch (err) {
+    console.error("Home page error:", err.message || err);
   }
 });
-
-function goToManageUsers() {
-  window.location.href = "manage-users.html";
-}

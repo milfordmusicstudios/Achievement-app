@@ -1,8 +1,4 @@
-// Must be included AFTER config.js is loaded
-// Example usage:
-fetch(`${BASE_API}/users`)
-//img.src = `${BASE_UPLOAD}${user.avatarUrl}`;
-
+// utils.js
 
 function calculateUserLevel(userId, logs, levels) {
   const userLogs = logs.filter(log => log.user === userId);
