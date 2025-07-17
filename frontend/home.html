@@ -82,30 +82,38 @@
   <script type="module" src="auth.js"></script>
   <script type="module" src="home.js"></script>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const user = JSON.parse(localStorage.getItem("loggedInUser"));
-      const role = localStorage.getItem("activeRole") || (Array.isArray(user?.role) ? user.role[0] : user?.role);
+  
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const user = JSON.parse(localStorage.getItem("loggedInUser"));
+    const storedRole = localStorage.getItem("activeRole");
+    const role = Array.isArray(user?.role) ? user.role[0] : user?.role || storedRole;
 
-      const myPointsBtn = document.getElementById("myPointsBtn");
-      const reviewLogsBtn = document.getElementById("reviewLogsBtn");
-      const manageUsersBtn = document.getElementById("manageUsersBtn");
+    const myPointsBtn = document.getElementById("myPointsBtn");
+    const reviewLogsBtn = document.getElementById("reviewLogsBtn");
+    const manageUsersBtn = document.getElementById("manageUsersBtn");
 
-      if (!user || !role) return;
+    if (!user || !role) return;
 
-      if (role === "admin") {
-        reviewLogsBtn.style.display = "inline-block";
-        manageUsersBtn.style.display = "inline-block";
-      } else if (role === "teacher") {
-        reviewLogsBtn.style.display = "inline-block";
-      } else {
-        myPointsBtn.style.display = "inline-block";
-      }
-    });
+    // Always show My Points
+    if (myPointsBtn) myPointsBtn.style.display = "inline-block";
 
-    function goToManageUsers() {
-      window.location.href = "manage-users.html";
+    if (["admin", "teacher"].includes(role)) {
+      if (reviewLogsBtn) reviewLogsBtn.style.display = "inline-block";
     }
-  </script>
+
+    if (role === "admin") {
+      if (manageUsersBtn) manageUsersBtn.style.display = "inline-block";
+    }
+
+    console.log("User:", user);
+    console.log("Active Role:", role);
+  });
+
+  function goToManageUsers() {
+    window.location.href = "manage-users.html";
+  }
+</script>
+
 </body>
 </html>

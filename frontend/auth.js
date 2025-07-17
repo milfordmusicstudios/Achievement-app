@@ -9,8 +9,15 @@ const supabase = createClient(
 
 // Get current logged-in user
 export function getCurrentUser() {
-  const user = localStorage.getItem("loggedInUser");
-  return user ? JSON.parse(user) : null;
+  try {
+    const user = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (!user || !user.id) return null;
+
+    user.role = Array.isArray(user.role) ? user.role : [user.role];
+    return user;
+  } catch (err) {
+    return null;
+  }
 }
 
 // Get the currently selected role (if user has multiple)
