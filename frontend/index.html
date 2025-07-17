@@ -5,15 +5,6 @@
   <title>Login | Achievement App</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
-
-  <!-- ✅ Load Supabase first -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-const supabase = supabase.createClient(
-  'https://tpcjdgucyrqrzuqvshki.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTI1NTE2NzYsImV4cCI6MjAyODEyNzY3Nn0.SgMNQUtkg1iHw8cN4nsjzJBNFO8kCsnXZUgS9T7xWvA'
-);
-  </script>
 </head>
 <body>
 
@@ -39,8 +30,16 @@ const supabase = supabase.createClient(
     &copy; 2025 Milford Music Studios Achievement App
   </footer>
 
-  <!-- ✅ Login Script (DOM loaded after Supabase is ready) -->
+  <!-- ✅ Load Supabase library first -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- ✅ Then initialize Supabase and handle login logic -->
   <script>
+    const supabase = supabase.createClient(
+      'https://tpcjdgucyrqrzuqvshki.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTI1NTE2NzYsImV4cCI6MjAyODEyNzY3Nn0.SgMNQUtkg1iHw8cN4nsjzJBNFO8kCsnXZUgS9T7xWvA'
+    );
+
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById('loginForm');
       const errorDisplay = document.getElementById('loginError');
@@ -48,11 +47,8 @@ const supabase = supabase.createClient(
       form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        const emailInput = document.getElementById('loginEmail');
-        const passwordInput = document.getElementById('loginPassword');
-
-        const email = emailInput.value.trim().toLowerCase();
-        const password = passwordInput.value;
+        const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+        const password = document.getElementById('loginPassword').value;
 
         if (!email || !password) {
           errorDisplay.style.display = 'block';
