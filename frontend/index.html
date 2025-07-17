@@ -5,6 +5,15 @@
   <title>Login | Achievement App</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
+
+  <!-- ✅ Load Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabase = supabase.createClient(
+      'https://tpcjdgucyrqrzuqvshki.supabase.co',
+      'your-anon-key-here'
+    );
+  </script>
 </head>
 <body>
 
@@ -15,10 +24,10 @@
     <form id="loginForm">
       <input type="email" id="loginEmail" placeholder="Email" required />
       <input type="password" id="loginPassword" placeholder="Password" required />
-<div class="button-row">
-  <button type="submit" class="blue-button">Login</button>
-  <button type="button" class="blue-button" onclick="window.location.href='signup.html'">Sign Up</button>
-</div>
+      <div class="button-row">
+        <button type="submit" class="blue-button">Login</button>
+        <button type="button" class="blue-button" onclick="window.location.href='signup.html'">Sign Up</button>
+      </div>
     </form>
 
     <p id="loginError" style="color: red; display: none; text-align: center; margin-top: 10px;">
@@ -30,16 +39,13 @@
     &copy; 2025 Milford Music Studios Achievement App
   </footer>
 
-  <!-- ✅ Load BASE_API configuration first -->
-  <script src="config.js"></script>
-
-  <!-- ✅ Login Script (placed at end to ensure DOM is loaded) -->
+  <!-- ✅ Login Script (DOM loaded last) -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById('loginForm');
       const errorDisplay = document.getElementById('loginError');
 
-      form.addEventListener('submit', function (e) {
+      form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
         const emailInput = document.getElementById('loginEmail');
@@ -54,29 +60,29 @@
           return;
         }
 
-        fetch(`${BASE_API}/users`)
-          .then(res => res.json())
-          .then(users => {
-            const user = users.find(u =>
-              u.email?.toLowerCase() === email &&
-              u.password === password
-            );
+        try {
+          const { data: users, error } = await supabase.from("users").select("*");
+          if (error) throw error;
 
-            if (user) {
-              localStorage.setItem("loggedInUser", JSON.stringify(user));
-              const active = Array.isArray(user.role) ? user.role[0] : user.role;
-              localStorage.setItem("activeRole", active);
-              window.location.href = "home.html";
-            } else {
-              errorDisplay.style.display = "block";
-              errorDisplay.textContent = "Invalid email or password.";
-            }
-          })
-          .catch(err => {
-            console.error("Login error:", err);
+          const user = users.find(u =>
+            u.email?.toLowerCase() === email &&
+            u.password === password
+          );
+
+          if (user) {
+            localStorage.setItem("loggedInUser", JSON.stringify(user));
+            const role = Array.isArray(user.role) ? user.role[0] : user.role;
+            localStorage.setItem("activeRole", role);
+            window.location.href = "home.html";
+          } else {
             errorDisplay.style.display = "block";
-            errorDisplay.textContent = "Server error. Please try again.";
-          });
+            errorDisplay.textContent = "Invalid email or password.";
+          }
+        } catch (err) {
+          console.error("Login error:", err);
+          errorDisplay.style.display = "block";
+          errorDisplay.textContent = "Server error. Please try again.";
+        }
       });
     });
   </script>
