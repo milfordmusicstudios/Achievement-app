@@ -11,16 +11,16 @@ const supabase = createClient(
 
 // Sample levels data (replace with your actual level structure if needed)
 const levels = [
-  { level: 1, minPoints: 0, maxPoints: 9, badge: "Images/Badges/Level1.png" },
-  { level: 2, minPoints: 10, maxPoints: 24, badge: "Images/Badges/Level2.png" },
-  { level: 3, minPoints: 25, maxPoints: 49, badge: "Images/Badges/Level3.png" },
-  { level: 4, minPoints: 50, maxPoints: 74, badge: "Images/Badges/Level4.png" },
-  { level: 5, minPoints: 75, maxPoints: 99, badge: "Images/Badges/Level5.png" },
-  { level: 6, minPoints: 100, maxPoints: 149, badge: "Images/Badges/Level6.png" },
-  { level: 7, minPoints: 150, maxPoints: 199, badge: "Images/Badges/Level7.png" },
-  { level: 8, minPoints: 200, maxPoints: 299, badge: "Images/Badges/Level8.png" },
-  { level: 9, minPoints: 300, maxPoints: 499, badge: "Images/Badges/Level9.png" },
-  { level: 10, minPoints: 500, maxPoints: 99999, badge: "Images/Badges/Level10.png" },
+  { level: 1, minPoints: 0, maxPoints: 9, badge: "images/badges/level1.png" },
+  { level: 2, minPoints: 10, maxPoints: 24, badge: "images/badges/level2.png" },
+  { level: 3, minPoints: 25, maxPoints: 49, badge: "images/badges/level3.png" },
+  { level: 4, minPoints: 50, maxPoints: 74, badge: "images/badges/level4.png" },
+  { level: 5, minPoints: 75, maxPoints: 99, badge: "images/badges/level5.png" },
+  { level: 6, minPoints: 100, maxPoints: 149, badge: "images/badges/level6.png" },
+  { level: 7, minPoints: 150, maxPoints: 199, badge: "images/badges/level7.png" },
+  { level: 8, minPoints: 200, maxPoints: 299, badge: "images/badges/level8.png" },
+  { level: 9, minPoints: 300, maxPoints: 499, badge: "images/badges/level9.png" },
+  { level: 10, minPoints: 500, maxPoints: 99999, badge: "images/badges/level10.png" },
 ];
 
 document.addEventListener("DOMContentLoaded", async () => {

@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const div = document.createElement("div");
       div.className = "category-summary";
       div.innerHTML = `
-        <img src="Images/Categories/${category}.png" alt="${category}" />
+        <img src="images/categories/${category}.png" alt="${category}" />
         <div><strong>${category}</strong><br>Logs: ${summary[category].count}<br>Points: ${summary[category].points}</div>
       `;
       summaryDiv.appendChild(div);

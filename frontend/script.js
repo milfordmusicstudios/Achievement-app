@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const div = document.createElement("div");
     div.className = "category-box";
     div.innerHTML = `
-      <img src="Images/Categories/${category}.png" alt="${category}" />
+      <img src="images/categories/${category}.png" alt="${category}" />
       <div><strong>Points</strong><br>${summary[category].points}</div>
       <div><strong>Log Entries</strong><br>${summary[category].count}</div>
     `;
@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   userLogs.forEach(log => {
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td><img src="Images/Categories/${log.category}.png" alt="${log.category}" style="width:50px;" /></td>
+      <td><img src="images/categories/${log.category}.png" alt="${log.category}" style="width:50px;" /></td>
       <td>${log.points}</td>
       <td>${log.note}</td>
       <td>${new Date(log.date).toLocaleString()}</td>

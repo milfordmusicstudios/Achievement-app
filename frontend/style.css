@@ -1261,7 +1261,7 @@ body.log-points-page {
 body.home-page,
 body.leaderboard-page,
 body.review-page {
-  background-image: url("Images\Background\TallBackground.png");
+  background-image: url("images\background\tallbackground.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -1281,7 +1281,7 @@ body.faq-page {
 
 /* ✅ Background image for tall pages */
 body.tall-background {
-  background-image: url("Images/Background/TallBackground.png");
+  background-image: url("images/background/tallBackground.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
