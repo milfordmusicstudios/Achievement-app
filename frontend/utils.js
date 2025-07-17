@@ -23,3 +23,5 @@ function calculateUserLevel(userId, logs, levels) {
     logs: userLogs
   };
 }
+
+export { calculateUserLevel };
