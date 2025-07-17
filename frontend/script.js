@@ -24,22 +24,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   const userPoints = userLogs.reduce((total, log) => total + log.points, 0);
 
   const levels = [
-    { level: 1, minPoints: 0, maxPoints: 9, image: "Level1.png" },
-    { level: 2, minPoints: 10, maxPoints: 24, image: "Level2.png" },
-    { level: 3, minPoints: 25, maxPoints: 49, image: "Level3.png" },
-    { level: 4, minPoints: 50, maxPoints: 74, image: "Level4.png" },
-    { level: 5, minPoints: 75, maxPoints: 99, image: "Level5.png" },
-    { level: 6, minPoints: 100, maxPoints: 149, image: "Level6.png" },
-    { level: 7, minPoints: 150, maxPoints: 199, image: "Level7.png" },
-    { level: 8, minPoints: 200, maxPoints: 299, image: "Level8.png" },
-    { level: 9, minPoints: 300, maxPoints: 499, image: "Level9.png" },
-    { level: 10, minPoints: 500, maxPoints: 99999, image: "Level10.png" },
+    { level: 1, minPoints: 0, maxPoints: 9, image: "level1.png" },
+    { level: 2, minPoints: 10, maxPoints: 24, image: "level2.png" },
+    { level: 3, minPoints: 25, maxPoints: 49, image: "level3.png" },
+    { level: 4, minPoints: 50, maxPoints: 74, image: "level4.png" },
+    { level: 5, minPoints: 75, maxPoints: 99, image: "level5.png" },
+    { level: 6, minPoints: 100, maxPoints: 149, image: "level6.png" },
+    { level: 7, minPoints: 150, maxPoints: 199, image: "level7.png" },
+    { level: 8, minPoints: 200, maxPoints: 299, image: "level8.png" },
+    { level: 9, minPoints: 300, maxPoints: 499, image: "level9.png" },
+    { level: 10, minPoints: 500, maxPoints: 99999, image: "level10.png" },
   ];
 
   const userLevel = levels.find(lvl => userPoints >= lvl.minPoints && userPoints <= lvl.maxPoints);
   const badgeElement = document.getElementById("levelBadge");
   if (userLevel && badgeElement) {
-    badgeElement.src = `Images/Badges/${userLevel.image}`;
+    badgeElement.src = `Images/badges/${userLevel.image}`;
   }
 
   const summary = {};
