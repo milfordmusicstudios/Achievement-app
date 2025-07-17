@@ -7,32 +7,25 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
   <main class="app login-page">
     <img src="Images/Logos/logo.png" alt="App Logo" class="logo" />
     <h2>Sign Up</h2>
-
     <form id="signupForm" class="login-form">
       <input type="text" id="firstName" placeholder="First Name" required />
       <input type="text" id="lastName" placeholder="Last Name" required />
       <input type="text" id="instrument" placeholder="Instrument" required />
-<select id="teacher" required>
-  <option value="">Select Your Teacher</option>
-</select>
+      <select id="teacher" required>
+        <option value="">Select Your Teacher</option>
+      </select>
       <input type="email" id="email" placeholder="Email" required />
       <input type="password" id="password" placeholder="Password" required />
-
       <div class="button-row">
         <button type="submit" class="blue-button">Create Account</button>
         <button type="button" class="blue-button" onclick="window.location.href='index.html'">Cancel</button>
       </div>
     </form>
-
-    <p id="signupError" style="color: red; display: none; text-align: center; margin-top: 10px;">
-      <!-- error message will go here -->
-    </p>
+    <p id="signupError" style="color: red; display: none; text-align: center; margin-top: 10px;"></p>
   </main>
-<script src="config.js"></script>
-  <script src="signup.js"></script>
+  <script type="module" src="signup.js"></script>
 </body>
 </html>
