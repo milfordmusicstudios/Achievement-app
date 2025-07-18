@@ -1,5 +1,3 @@
-// review-logs.js
-
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 import { getCurrentUser } from './auth.js';
 
@@ -13,8 +11,7 @@ const categories = ["Practice", "Participation", "Performance", "Improvement", "
 document.addEventListener("DOMContentLoaded", async () => {
   const user = getCurrentUser();
   if (!user || (!user.roles?.includes("admin") && !user.roles?.includes("teacher"))) {
-    window.location.href = "index.html";
-    return;
+    return window.location.href = "index.html";
   }
 
   try {
@@ -29,11 +26,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const users = userResult.data;
     const logs = logResult.data;
-
-    const tableBody = document.getElementById("reviewLogTableBody");
     const summaryDiv = document.getElementById("categorySummary");
+    const tableBody = document.getElementById("reviewLogTableBody");
 
-    // Category summary
     const summary = {};
     categories.forEach(cat => (summary[cat] = { count: 0, points: 0 }));
 
@@ -54,7 +49,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       summaryDiv.appendChild(div);
     }
 
-    // Table
     const userMap = {};
     users.forEach(u => {
       userMap[u.id] = `${u.firstName} ${u.lastName}`;
@@ -63,36 +57,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     logs.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(log => {
       const row = document.createElement("tr");
 
-      const userCell = document.createElement("td");
-      userCell.textContent = userMap[log.user] || log.user;
-
-      const categoryCell = document.createElement("td");
-      categoryCell.textContent = log.category;
-
-      const pointsCell = document.createElement("td");
-      pointsCell.textContent = log.points;
-
-      const noteCell = document.createElement("td");
-      noteCell.textContent = log.note || "";
-
-      const dateCell = document.createElement("td");
-      dateCell.textContent = new Date(log.date).toLocaleDateString();
-
-      const statusCell = document.createElement("td");
-      statusCell.textContent = log.status || "Pending";
-
-      row.appendChild(userCell);
-      row.appendChild(categoryCell);
-      row.appendChild(pointsCell);
-      row.appendChild(noteCell);
-      row.appendChild(dateCell);
-      row.appendChild(statusCell);
+      row.innerHTML = `
+        <td>${userMap[log.user] || log.user}</td>
+        <td>${log.category}</td>
+        <td>${log.points}</td>
+        <td>${log.note || ""}</td>
+        <td>${new Date(log.date).toLocaleDateString()}</td>
+        <td>${log.status || "Pending"}</td>
+      `;
 
       tableBody.appendChild(row);
     });
 
   } catch (err) {
-    console.error("Error loading review logs:", err);
+    console.error("Error loading review logs:", err.message || err);
     alert("Failed to load review logs.");
   }
 });

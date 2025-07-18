@@ -1,7 +1,7 @@
 // home.js
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-import { getCurrentUser } from './auth.js';
+import { getCurrentUser, getActiveRole } from './auth.js';
 import { calculateUserLevel } from './utils.js';
 
 const supabase = createClient(
@@ -24,6 +24,7 @@ const levels = [
 
 document.addEventListener("DOMContentLoaded", async () => {
   const user = getCurrentUser();
+  const role = getActiveRole();
   if (!user) return (window.location.href = "index.html");
 
   const welcomeEl = document.getElementById("welcomeTitle");
@@ -35,7 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (welcomeEl) welcomeEl.textContent = `Welcome ${user.firstName}`;
 
   try {
-    // Get avatar image
+    // Load avatar
     if (user.avatarUrl) {
       const { data: avatarData } = supabase.storage.from("avatars").getPublicUrl(user.avatarUrl);
       if (avatarEl && avatarData?.publicUrl) {
@@ -43,15 +44,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    // Get logs
-    const { data: logs, error } = await supabase.from("logs").select("*");
-    if (error) throw error;
-
-    const { level, percent } = calculateUserLevel(user.id, logs, levels);
-
-    if (badgeEl) badgeEl.src = level.badge;
-    if (progressBar) progressBar.style.width = `${percent}%`;
-    if (percentEl) percentEl.textContent = `${percent}% to next level`;
+    // Show badge depending on role
+    if (["admin", "teacher"].includes(role)) {
+      if (badgeEl) badgeEl.src = `images/badges/${role}.png`;
+      if (progressBar) progressBar.style.display = "none";
+      if (percentEl) percentEl.style.display = "none";
+    } else {
+      // Student badge and progress
+      const { data: logs, error } = await supabase.from("logs").select("*");
+      if (error) throw error;
+      const { level, percent } = calculateUserLevel(user.id, logs, levels);
+      if (badgeEl) badgeEl.src = level.badge;
+      if (progressBar) progressBar.style.width = `${percent}%`;
+      if (percentEl) percentEl.textContent = `${percent}% to next level`;
+    }
   } catch (err) {
     console.error("Home page error:", err.message || err);
   }

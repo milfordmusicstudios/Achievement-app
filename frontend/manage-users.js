@@ -1,5 +1,3 @@
-// manage-users.js
-
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const supabase = createClient(
@@ -9,6 +7,8 @@ const supabase = createClient(
 
 document.addEventListener("DOMContentLoaded", async () => {
   const tableBody = document.getElementById("userTableBody");
+  const homeBtn = document.getElementById("goHome");
+  if (homeBtn) homeBtn.onclick = () => window.location.href = "home.html";
 
   const { data: users, error } = await supabase.from("users").select("*");
   if (error) {
@@ -17,40 +17,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  users.forEach((user, index) => {
+  users.forEach(user => {
     const row = document.createElement("tr");
 
     const nameCell = document.createElement("td");
-    nameCell.textContent = user.firstName + " " + user.lastName;
+    nameCell.textContent = `${user.firstName} ${user.lastName}`;
     row.appendChild(nameCell);
 
     const emailCell = document.createElement("td");
     const emailInput = document.createElement("input");
     emailInput.type = "email";
     emailInput.value = user.email || "";
-    emailInput.dataset.userId = user.id;
     emailCell.appendChild(emailInput);
     row.appendChild(emailCell);
 
-    const roleCell = document.createElement("td");
-    const roleInput = document.createElement("input");
-    roleInput.type = "text";
-    roleInput.value = Array.isArray(user.roles) ? user.roles.join(", ") : (user.roles || "");
-    roleInput.dataset.userId = user.id;
-    roleCell.appendChild(roleInput);
-    row.appendChild(roleCell);
+    const rolesCell = document.createElement("td");
+    const rolesInput = document.createElement("input");
+    rolesInput.type = "text";
+    rolesInput.value = Array.isArray(user.roles) ? user.roles.join(", ") : (user.roles || "");
+    rolesCell.appendChild(rolesInput);
+    row.appendChild(rolesCell);
 
     const saveCell = document.createElement("td");
-    const saveButton = document.createElement("button");
-    saveButton.textContent = "Save";
-    saveButton.className = "blue-button";
-    saveButton.onclick = async () => {
+    const saveBtn = document.createElement("button");
+    saveBtn.textContent = "Save";
+    saveBtn.className = "blue-button";
+    saveBtn.onclick = async () => {
+      const updatedRoles = rolesInput.value.split(",").map(r => r.trim().toLowerCase());
       const updatedEmail = emailInput.value;
-      const updatedRole = roleInput.value.split(",").map(r => r.trim());
 
       const { error } = await supabase.from("users").update({
         email: updatedEmail,
-        roles: updatedRole
+        roles: updatedRoles
       }).eq("id", user.id);
 
       if (error) {
@@ -60,7 +58,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         alert("User updated successfully.");
       }
     };
-    saveCell.appendChild(saveButton);
+
+    saveCell.appendChild(saveBtn);
     row.appendChild(saveCell);
 
     tableBody.appendChild(row);
