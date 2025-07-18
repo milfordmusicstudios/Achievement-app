@@ -67,7 +67,7 @@ form.addEventListener('submit', async function (e) {
 
           if (user) {
             localStorage.setItem("loggedInUser", JSON.stringify(user));
-            const role = Array.isArray(user.role) ? user.role[0] : user.role;
+            const role = Array.isArray(user.roles) ? user.roles[0] : user.roles;
             localStorage.setItem("activeRole", role);
             window.location.href = "home.html";
           } else {

@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const roleCell = document.createElement("td");
     const roleInput = document.createElement("input");
     roleInput.type = "text";
-    roleInput.value = Array.isArray(user.role) ? user.role.join(", ") : (user.role || "");
+    roleInput.value = Array.isArray(user.roles) ? user.roles.join(", ") : (user.roles || "");
     roleInput.dataset.userId = user.id;
     roleCell.appendChild(roleInput);
     row.appendChild(roleCell);
@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const { error } = await supabase.from("users").update({
         email: updatedEmail,
-        role: updatedRole
+        roles: updatedRole
       }).eq("id", user.id);
 
       if (error) {

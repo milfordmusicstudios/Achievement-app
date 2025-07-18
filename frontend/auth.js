@@ -13,7 +13,7 @@ export function getCurrentUser() {
     const user = JSON.parse(localStorage.getItem("loggedInUser"));
     if (!user || !user.id) return null;
 
-    user.role = Array.isArray(user.role) ? user.role : [user.role];
+    user.roles = Array.isArray(user.roles) ? user.roles : [user.roles];
     return user;
   } catch (err) {
     return null;

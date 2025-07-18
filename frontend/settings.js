@@ -76,7 +76,7 @@ function promptRoleSwitch() {
   const user = JSON.parse(localStorage.getItem("loggedInUser"));
   const roleList = Array.isArray(user.roles)
     ? user.roles
-    : (Array.isArray(user.role) ? user.role : [user.role]);
+    : (Array.isArray(user.roles) ? user.roles : [user.roles]);
 
   const listContainer = document.getElementById("roleSwitchList");
   listContainer.innerHTML = "";
@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const roles = Array.isArray(user.roles)
     ? user.roles
-    : (Array.isArray(user.role) ? user.role : [user.role]);
+    : (Array.isArray(user.roles) ? user.roles : [user.roles]);
 
   if (roles.length < 2 || !switchRoleBtn) {
     switchRoleBtn.style.display = "none";

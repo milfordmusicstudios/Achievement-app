@@ -87,7 +87,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     const user = JSON.parse(localStorage.getItem("loggedInUser"));
     const storedRole = localStorage.getItem("activeRole");
-    const role = Array.isArray(user?.role) ? user.role[0] : user?.role || storedRole;
+const role = Array.isArray(user?.roles) ? user.roles[0] : user?.roles || storedRole;
 
     const myPointsBtn = document.getElementById("myPointsBtn");
     const reviewLogsBtn = document.getElementById("reviewLogsBtn");

@@ -12,7 +12,7 @@ const categories = ["Practice", "Participation", "Performance", "Improvement", "
 
 document.addEventListener("DOMContentLoaded", async () => {
   const user = getCurrentUser();
-  if (!user || (!user.role?.includes("admin") && !user.role?.includes("teacher"))) {
+  if (!user || (!user.roles?.includes("admin") && !user.roles?.includes("teacher"))) {
     window.location.href = "index.html";
     return;
   }

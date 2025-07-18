@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.getElementById("welcomeText").textContent = `Welcome ${user.firstName}`;
   document.getElementById("myPointsButton").style.display =
-    user.role.includes("student") ? "inline-block" : "none";
+    user.roles.includes("student") ? "inline-block" : "none";
 
   try {
     // 🔹 Get avatar URL from Supabase Storage
