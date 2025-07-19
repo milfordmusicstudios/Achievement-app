@@ -24,6 +24,7 @@ const levels = [
 
 document.addEventListener("DOMContentLoaded", async () => {
   const user = getCurrentUser();
+window.user = user;
   const role = getActiveRole();
   if (!user) return (window.location.href = "index.html");
 
