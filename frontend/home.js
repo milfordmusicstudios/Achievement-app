@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log("Resolved avatar URL:", data?.publicUrl);
       if (avatarEl) avatarEl.src = data?.publicUrl || "avatars/default.png";
     } else {
-      const { data } = supabase.storage.from("avatars").getPublicUrl("public/austin_lisa.png");
+      const { data } = supabase.storage.from("avatars").getPublicUrl("austin_lisa.png");
       console.log("Fallback avatar URL:", data?.publicUrl);
       if (avatarEl) avatarEl.src = data?.publicUrl || "avatars/default.png";
     }
