@@ -39,7 +39,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     if (user.avatarUrl && user.avatarUrl.length > 3) {
-      const { data } = supabase.storage.from("avatars").getPublicUrl(user.avatarUrl);
+      const { data } = avatarEl.src = "https://tpcjdgucyrqrzuqvshki.supabase.co/storage/v1/object/public/avatars/austin_lisa.png";
+
       console.log("Resolved avatar URL:", data?.publicUrl);
       if (avatarEl) avatarEl.src = data?.publicUrl || "avatars/default.png";
     } else {
