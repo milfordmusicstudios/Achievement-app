@@ -36,14 +36,21 @@ window.user = user;
 
   if (welcomeEl) welcomeEl.textContent = `Welcome ${user.firstName}`;
 
-  try {
-    // Load avatar
-if (user.avatarUrl) {
-  const { data: avatarData } = supabase.storage.from("avatars").getPublicUrl(user.avatarUrl);
-  avatarEl.src = avatarData?.publicUrl || 'avatars/default.png';
-} else {
-  avatarEl.src = 'avatars/default.png';
-}
+try {
+  // DEBUG: Show raw avatarUrl from user
+  console.log("User avatarUrl:", user.avatarUrl);
+
+  // Load avatar if set
+  if (user.avatarUrl && user.avatarUrl.length > 3) {
+    const { data } = supabase.storage.from("avatars").getPublicUrl(user.avatarUrl);
+    console.log("Resolved avatar URL:", data?.publicUrl);
+    avatarEl.src = data?.publicUrl || "avatars/default.png";
+  } else {
+    // OPTIONAL: hard-coded fallback for testing
+    const { data } = supabase.storage.from("avatars").getPublicUrl("public/austin_lisa.png");
+    console.log("Fallback avatar URL:", data?.publicUrl);
+    avatarEl.src = data?.publicUrl || "avatars/default.png";
+  }
 
 const progressCard = document.getElementById("progressCard");
 const percentLabel = document.getElementById("homeProgressLabel");
