@@ -1,4 +1,3 @@
-// home.js
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 import { getCurrentUser, getActiveRole } from './auth.js';
@@ -24,7 +23,6 @@ const levels = [
 
 document.addEventListener("DOMContentLoaded", async () => {
   const user = getCurrentUser();
-window.user = user;
   const role = getActiveRole();
   if (!user) return (window.location.href = "index.html");
 
@@ -33,44 +31,39 @@ window.user = user;
   const badgeEl = document.getElementById("homeBadge");
   const progressBar = document.getElementById("homeProgressBar");
   const percentEl = document.getElementById("homeProgressText");
+  const percentLabel = document.getElementById("homeProgressLabel");
+  const progressCard = document.getElementById("progressCard");
 
   if (welcomeEl) welcomeEl.textContent = `Welcome ${user.firstName}`;
-
-try {
-  // DEBUG: Show raw avatarUrl from user
   console.log("User avatarUrl:", user.avatarUrl);
 
-  // Load avatar if set
-  if (user.avatarUrl && user.avatarUrl.length > 3) {
-    const { data } = supabase.storage.from("avatars").getPublicUrl(user.avatarUrl);
-    console.log("Resolved avatar URL:", data?.publicUrl);
-    avatarEl.src = data?.publicUrl || "avatars/default.png";
-  } else {
-    // OPTIONAL: hard-coded fallback for testing
-    const { data } = supabase.storage.from("avatars").getPublicUrl("public/austin_lisa.png");
-    console.log("Fallback avatar URL:", data?.publicUrl);
-    avatarEl.src = data?.publicUrl || "avatars/default.png";
-  }
+  try {
+    if (user.avatarUrl && user.avatarUrl.length > 3) {
+      const { data } = supabase.storage.from("avatars").getPublicUrl(user.avatarUrl);
+      console.log("Resolved avatar URL:", data?.publicUrl);
+      if (avatarEl) avatarEl.src = data?.publicUrl || "avatars/default.png";
+    } else {
+      const { data } = supabase.storage.from("avatars").getPublicUrl("public/austin_lisa.png");
+      console.log("Fallback avatar URL:", data?.publicUrl);
+      if (avatarEl) avatarEl.src = data?.publicUrl || "avatars/default.png";
+    }
 
-const progressCard = document.getElementById("progressCard");
-const percentLabel = document.getElementById("homeProgressLabel");
-
-if (["admin", "teacher"].includes(role)) {
-  if (badgeEl) badgeEl.src = `images/badges/${role}.png`;
-  if (progressCard) progressCard.style.display = "none";
-  if (progressBar) progressBar.style.display = "none";
-  if (percentEl) percentEl.style.display = "none";
-  if (percentLabel) percentLabel.style.display = "none";
-  document.getElementById("myPointsBtn")?.classList.add("hidden");
-}
- else {
-  const { data: logs, error } = await supabase.from("logs").select("*");
-  if (error) throw error;
-  const { level, percent } = calculateUserLevel(user.id, logs, levels);
-  if (badgeEl) badgeEl.src = level.badge;
-  if (progressBar) progressBar.style.width = `${percent}%`;
-  if (percentEl) percentEl.textContent = `${percent}% to next level`;
-}
+    if (["admin", "teacher"].includes(role)) {
+      if (badgeEl) badgeEl.src = `images/badges/${role}.png`;
+      if (progressCard) progressCard.style.display = "none";
+      if (progressBar) progressBar.style.display = "none";
+      if (percentEl) percentEl.style.display = "none";
+      if (percentLabel) percentLabel.style.display = "none";
+      document.getElementById("myPointsBtn")?.classList.add("hidden");
+    } else {
+      const { data: logs, error } = await supabase.from("logs").select("*");
+      if (error) throw error;
+      const { level, percent } = calculateUserLevel(user.id, logs, levels);
+      if (badgeEl) badgeEl.src = level.badge;
+      if (progressBar) progressBar.style.width = `${percent}%`;
+      if (percentEl) percentEl.textContent = `${percent}% to next level`;
+      if (percentLabel) percentLabel.innerHTML = `<span id="levelPercent">${percent}%</span> to next level`;
+    }
   } catch (err) {
     console.error("Home page error:", err.message || err);
   }
