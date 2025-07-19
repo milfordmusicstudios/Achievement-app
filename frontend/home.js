@@ -35,20 +35,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const progressCard = document.getElementById("progressCard");
 
   if (welcomeEl) welcomeEl.textContent = `Welcome ${user.firstName}`;
-  console.log("User avatarUrl:", user.avatarUrl);
+
+  if (avatarEl) {
+    avatarEl.src = user.avatarUrl || "avatars/default.png";
+  }
 
   try {
-    if (user.avatarUrl && user.avatarUrl.length > 3) {
-      const { data } = avatarEl.src = "https://tpcjdgucyrqrzuqvshki.supabase.co/storage/v1/object/public/avatars/austin_lisa.png";
-
-      console.log("Resolved avatar URL:", data?.publicUrl);
-      if (avatarEl) avatarEl.src = data?.publicUrl || "avatars/default.png";
-    } else {
-      const { data } = supabase.storage.from("avatars").getPublicUrl("austin_lisa.png");
-      console.log("Fallback avatar URL:", data?.publicUrl);
-      if (avatarEl) avatarEl.src = data?.publicUrl || "avatars/default.png";
-    }
-
     if (["admin", "teacher"].includes(role)) {
       if (badgeEl) badgeEl.src = `images/badges/${role}.png`;
       if (progressCard) progressCard.style.display = "none";
