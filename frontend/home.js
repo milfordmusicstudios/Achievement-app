@@ -37,27 +37,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     // Load avatar
-    if (user.avatarUrl) {
-      const { data: avatarData } = supabase.storage.from("avatars").getPublicUrl(user.avatarUrl);
-      if (avatarEl && avatarData?.publicUrl) {
-        avatarEl.src = avatarData.publicUrl;
-      }
-    }
+if (user.avatarUrl) {
+  const { data: avatarData } = supabase.storage.from("avatars").getPublicUrl(user.avatarUrl);
+  avatarEl.src = avatarData?.publicUrl || 'images/avatars/default.png';
+} else {
+  avatarEl.src = 'images/avatars/default.png';
+}
 
     // Show badge depending on role
-    if (["admin", "teacher"].includes(role)) {
-      if (badgeEl) badgeEl.src = `images/badges/${role}.png`;
-      if (progressBar) progressBar.style.display = "none";
-      if (percentEl) percentEl.style.display = "none";
-    } else {
-      // Student badge and progress
-      const { data: logs, error } = await supabase.from("logs").select("*");
-      if (error) throw error;
-      const { level, percent } = calculateUserLevel(user.id, logs, levels);
-      if (badgeEl) badgeEl.src = level.badge;
-      if (progressBar) progressBar.style.width = `${percent}%`;
-      if (percentEl) percentEl.textContent = `${percent}% to next level`;
-    }
+if (["admin", "teacher"].includes(role)) {
+  if (badgeEl) badgeEl.src = `images/badges/${role}.png`;
+  if (progressBar) progressBar.style.display = "none";
+  if (percentEl) percentEl.style.display = "none";
+  document.getElementById("myPointsBtn")?.classList.add("hidden");
+} else {
+  const { data: logs, error } = await supabase.from("logs").select("*");
+  if (error) throw error;
+  const { level, percent } = calculateUserLevel(user.id, logs, levels);
+  if (badgeEl) badgeEl.src = level.badge;
+  if (progressBar) progressBar.style.width = `${percent}%`;
+  if (percentEl) percentEl.textContent = `${percent}% to next level`;
+}
   } catch (err) {
     console.error("Home page error:", err.message || err);
   }
