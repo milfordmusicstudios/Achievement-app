@@ -81,9 +81,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         avatar.className = "leader-avatar";
         if (item.avatar) {
           const { data: avatarData } = supabase.storage.from("avatars").getPublicUrl(item.avatar);
-          avatar.src = avatarData.publicUrl || "images/avatars/default.png";
+          avatar.src = avatarData.publicUrl || "avatars/default.png";
         } else {
-          avatar.src = "images/avatars/default.png";
+          avatar.src = "avatars/default.png";
         }
 
         const text = document.createElement("span");

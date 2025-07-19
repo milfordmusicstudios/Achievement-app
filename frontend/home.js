@@ -39,18 +39,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Load avatar
 if (user.avatarUrl) {
   const { data: avatarData } = supabase.storage.from("avatars").getPublicUrl(user.avatarUrl);
-  avatarEl.src = avatarData?.publicUrl || 'images/avatars/default.png';
+  avatarEl.src = avatarData?.publicUrl || 'avatars/default.png';
 } else {
-  avatarEl.src = 'images/avatars/default.png';
+  avatarEl.src = 'avatars/default.png';
 }
 
-    // Show badge depending on role
+const progressCard = document.getElementById("progressCard");
+const percentLabel = document.getElementById("homeProgressLabel");
+
 if (["admin", "teacher"].includes(role)) {
   if (badgeEl) badgeEl.src = `images/badges/${role}.png`;
+  if (progressCard) progressCard.style.display = "none";
   if (progressBar) progressBar.style.display = "none";
   if (percentEl) percentEl.style.display = "none";
+  if (percentLabel) percentLabel.style.display = "none";
   document.getElementById("myPointsBtn")?.classList.add("hidden");
-} else {
+}
+ else {
   const { data: logs, error } = await supabase.from("logs").select("*");
   if (error) throw error;
   const { level, percent } = calculateUserLevel(user.id, logs, levels);

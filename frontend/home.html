@@ -15,15 +15,14 @@
         <img id="homeBadge" class="badge" src="" alt="Level Badge" />
       </div>
 
-      <div class="progress-card">
-        <div class="progress-label">Level Progress</div>
-        <div class="progress-container">
-      <div class="percent-label"><span id="levelPercent">0%</span> to next level</div>
-          <div class="progress-bar" id="homeProgressBar" style="width: 0%;"></div>
-        </div>
-      </div>
-
-      <div class="percent-text" id="homeProgressText">75% to next level</div>
+<div class="progress-card" id="progressCard"> <!-- ADD ID HERE -->
+  <div class="progress-label">Level Progress</div>
+  <div class="progress-container">
+    <div class="percent-label" id="homeProgressLabel"><span id="levelPercent">0%</span> to next level</div>
+    <div class="progress-bar" id="homeProgressBar" style="width: 0%;"></div>
+  </div>
+</div>
+<div class="percent-text" id="homeProgressText">75% to next level</div>
 
       <div class="button-wrapper">
         <div class="button-area">
@@ -95,8 +94,12 @@ const role = Array.isArray(user?.roles) ? user.roles[0] : user?.roles || storedR
 
     if (!user || !role) return;
 
-    // Always show My Points
-    if (myPointsBtn) myPointsBtn.style.display = "inline-block";
+// Only show My Points if student
+if (myPointsBtn && role === "student") {
+  myPointsBtn.style.display = "inline-block";
+} else if (myPointsBtn) {
+  myPointsBtn.style.display = "none";
+}
 
     if (["admin", "teacher"].includes(role)) {
       if (reviewLogsBtn) reviewLogsBtn.style.display = "inline-block";
