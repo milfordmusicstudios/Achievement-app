@@ -2,63 +2,98 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const supabase = createClient(
   'https://tpcjdgucyrqrzuqvshki.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MDE5OTksImV4cCI6MjA2ODI3Nzk5OX0.XGHcwyeTzYje6cjd3PHQrr7CyyEcaoRB4GyTYN1fDqo'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
 );
 
 document.addEventListener("DOMContentLoaded", async () => {
   const tableBody = document.getElementById("userTableBody");
-  const homeBtn = document.getElementById("goHome");
-  if (homeBtn) homeBtn.onclick = () => window.location.href = "home.html";
+
+  function showMessage(msg) {
+    const div = document.createElement("div");
+    div.textContent = msg;
+    div.style.position = "fixed";
+    div.style.bottom = "40px";
+    div.style.left = "50%";
+    div.style.transform = "translateX(-50%)";
+    div.style.background = "#00477d";
+    div.style.color = "white";
+    div.style.padding = "12px 20px";
+    div.style.borderRadius = "10px";
+    div.style.fontSize = "16px";
+    div.style.zIndex = "9999";
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 3000);
+  }
 
   const { data: users, error } = await supabase.from("users").select("*");
   if (error) {
     console.error("Failed to load users:", error.message);
-    alert("Unable to load users. Try again later.");
+    showMessage("Unable to load users.");
     return;
   }
 
   users.forEach(user => {
     const row = document.createElement("tr");
 
-    const nameCell = document.createElement("td");
-    nameCell.textContent = `${user.firstName} ${user.lastName}`;
-    row.appendChild(nameCell);
+    const firstName = document.createElement("input");
+    firstName.value = user.firstName || "";
 
-    const emailCell = document.createElement("td");
-    const emailInput = document.createElement("input");
-    emailInput.type = "email";
-    emailInput.value = user.email || "";
-    emailCell.appendChild(emailInput);
-    row.appendChild(emailCell);
+    const lastName = document.createElement("input");
+    lastName.value = user.lastName || "";
 
-    const rolesCell = document.createElement("td");
-    const rolesInput = document.createElement("input");
-    rolesInput.type = "text";
-    rolesInput.value = Array.isArray(user.roles) ? user.roles.join(", ") : (user.roles || "");
-    rolesCell.appendChild(rolesInput);
-    row.appendChild(rolesCell);
+    const email = document.createElement("input");
+    email.type = "email";
+    email.value = user.email || "";
 
-    const saveCell = document.createElement("td");
+    const avatar = document.createElement("input");
+    avatar.type = "text";
+    avatar.value = user.avatar || "";
+
+    const roles = document.createElement("input");
+    roles.value = Array.isArray(user.roles) ? user.roles.join(", ") : (user.roles || "");
+
+    const teacher = document.createElement("input");
+    teacher.value = user.teacher || "";
+
+    const instrument = document.createElement("input");
+    instrument.value = user.instrument || "";
+
+    const cells = [
+      firstName, lastName,
+      document.createTextNode(user.id), // ID not editable
+      email, avatar, roles, teacher, instrument
+    ];
+
+    cells.forEach(el => {
+      const td = document.createElement("td");
+      td.appendChild(el.nodeType ? el : el);
+      row.appendChild(td);
+    });
+
     const saveBtn = document.createElement("button");
     saveBtn.textContent = "Save";
     saveBtn.className = "blue-button";
-    saveBtn.onclick = async () => {
-      const updatedRoles = rolesInput.value.split(",").map(r => r.trim().toLowerCase());
-      const updatedEmail = emailInput.value;
 
+    saveBtn.onclick = async () => {
       const { error } = await supabase.from("users").update({
-        email: updatedEmail,
-        roles: updatedRoles
+        firstName: firstName.value.trim(),
+        lastName: lastName.value.trim(),
+        email: email.value.trim(),
+        avatar: avatar.value.trim(),
+        roles: roles.value.split(",").map(r => r.trim().toLowerCase()),
+        teacher: teacher.value.trim(),
+        instrument: instrument.value.trim()
       }).eq("id", user.id);
 
       if (error) {
         console.error("Update error:", error.message);
-        alert("Failed to update user.");
+        showMessage("Failed to update user.");
       } else {
-        alert("User updated successfully.");
+        showMessage("User updated!");
       }
     };
 
+    const saveCell = document.createElement("td");
     saveCell.appendChild(saveBtn);
     row.appendChild(saveCell);
 

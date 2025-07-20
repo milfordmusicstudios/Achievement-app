@@ -2,85 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login | Achievement App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="container center-content">
+    <h1>Achievement App</h1>
+    <h2>Login</h2>
+    <form id="loginForm" class="form-card">
+      <label for="loginEmail">Email:</label>
+      <input type="email" id="loginEmail" required />
 
-  <main class="app">
-    <img src="images/logos/logo.png" alt="App Logo" class="logo" />
-    <h2 id="loginTitle">Achievement Awards</h2>
+      <label for="loginPassword">Password:</label>
+      <input type="password" id="loginPassword" required />
 
-    <form id="loginForm">
-      <input type="email" id="loginEmail" placeholder="Email" required />
-      <input type="password" id="loginPassword" placeholder="Password" required />
-      <div class="button-row">
-        <button type="submit" class="blue-button">Login</button>
-        <button type="button" class="blue-button" onclick="window.location.href='signup.html'">Sign Up</button>
-      </div>
+      <button type="submit" class="blue-button">Login</button>
+      <p id="loginError" class="error-message" style="display: none;"></p>
     </form>
 
-    <p id="loginError" style="color: red; display: none; text-align: center; margin-top: 10px;">
-      Invalid email or password.
-    </p>
-  </main>
+    <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
+  </div>
 
-  <footer>
-    &copy; 2025 Milford Music Studios Achievement App
-  </footer>
-
-  <!-- ✅ Supabase JS and client setup -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const client = supabase.createClient(
-      'https://tpcjdgucyrqrzuqvshki.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MDE5OTksImV4cCI6MjA2ODI3Nzk5OX0.XGHcwyeTzYje6cjd3PHQrr7CyyEcaoRB4GyTYN1fDqo'
-    );
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const form = document.getElementById('loginForm');
-      const errorDisplay = document.getElementById('loginError');
-
-form.addEventListener('submit', async function (e) {
-  e.preventDefault();
-
-  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-  const password = document.getElementById('loginPassword').value;
-
-  // 🔍 Add these logs to debug
-  console.log("Entered Email:", email);
-  console.log("Entered Password:", password);
-
-  try {
-    const { data: users, error } = await client.from("users").select("*");
-    if (error) throw error;
-
-    console.log("Users from Supabase:", users); // 🔍 Check what Supabase returns
-
-    const user = users.find(u =>
-      u.email?.toLowerCase() === email &&
-      u.password === password
-    );
-
-    console.log("Matched user:", user); // 🔍 Was a match found?
-
-          if (user) {
-            localStorage.setItem("loggedInUser", JSON.stringify(user));
-            const role = Array.isArray(user.roles) ? user.roles[0] : user.roles;
-            localStorage.setItem("activeRole", role);
-            window.location.href = "home.html";
-          } else {
-            errorDisplay.style.display = "block";
-            errorDisplay.textContent = "Invalid email or password.";
-          }
-        } catch (err) {
-          console.error("Login error:", err);
-          errorDisplay.style.display = "block";
-          errorDisplay.textContent = "Server error. Please try again.";
-        }
-      });
-    });
-  </script>
+  <!-- ✅ Secure login logic -->
+  <script type="module" src="login.js"></script>
 </body>
 </html>

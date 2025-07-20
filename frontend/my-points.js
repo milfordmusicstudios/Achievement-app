@@ -1,22 +1,37 @@
-// my-points.js
-
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 import { getCurrentUser } from './auth.js';
 import { calculateUserLevel } from './utils.js';
 
 const supabase = createClient(
   'https://tpcjdgucyrqrzuqvshki.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MDE5OTksImV4cCI6MjA2ODI3Nzk5OX0.XGHcwyeTzYje6cjd3PHQrr7CyyEcaoRB4GyTYN1fDqo'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
 );
 
 const categories = ["Practice", "Participation", "Performance", "Improvement", "Teamwork"];
+
+function showMessage(msg) {
+  const div = document.createElement("div");
+  div.textContent = msg;
+  div.style.position = "fixed";
+  div.style.bottom = "40px";
+  div.style.left = "50%";
+  div.style.transform = "translateX(-50%)";
+  div.style.background = "#00477d";
+  div.style.color = "white";
+  div.style.padding = "12px 20px";
+  div.style.borderRadius = "10px";
+  div.style.fontSize = "16px";
+  div.style.zIndex = "9999";
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 3000);
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
   const user = getCurrentUser();
   if (!user) return (window.location.href = "index.html");
 
   const badgeImg = document.getElementById("myPointsBadge");
-  const summaryContainer = document.getElementById("categorySummary");
+  const summaryContainer = document.getElementById("categorySummaries");
   const logTableBody = document.getElementById("logTableBody");
 
   try {
@@ -25,7 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const userLogs = logs.filter(log => log.user === user.id);
 
-    // Level calculation
+    // Calculate level and update badge
     const levels = [
       { level: 1, minPoints: 0, maxPoints: 9, badge: "images/badges/level1.png" },
       { level: 2, minPoints: 10, maxPoints: 24, badge: "images/badges/level2.png" },
@@ -42,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const { level } = calculateUserLevel(user.id, userLogs, levels);
     badgeImg.src = level.badge;
 
-    // Summary display
+    // Category summaries
     categories.forEach(category => {
       const catLogs = userLogs.filter(log => log.category === category);
       const totalPoints = catLogs.reduce((sum, log) => sum + log.points, 0);
@@ -51,7 +66,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       summary.classList.add("category-summary");
 
       const img = document.createElement("img");
-      img.src = `Images/Categories/${category}.png`;
+      img.src = `images/categories/${category}.png`;
       img.alt = category;
 
       const text = document.createElement("div");
@@ -62,7 +77,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       summaryContainer.appendChild(summary);
     });
 
-    // Table display
+    // Log table
     userLogs.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(log => {
       const row = document.createElement("tr");
 
@@ -87,6 +102,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   } catch (err) {
     console.error("Error loading my points page:", err.message || err);
-    alert("Failed to load your points.");
+    showMessage("Failed to load your points.");
   }
 });

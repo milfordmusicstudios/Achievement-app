@@ -12,7 +12,10 @@
     <button class="blue-button" onclick="location.href='home.html'">Home</button>
     <h2 class="leaderboard-title" style="flex: 1; text-align: center;">Review Logs</h2>
   </div>
+
+  <!-- ✅ Correct ID -->
   <div id="categorySummaries" class="category-summary-wrapper"></div>
+
   <div class="log-feed scroll-wrapper">
     <table>
       <thead>
@@ -25,14 +28,16 @@
           <th onclick="sortLogsBy('status')">Status <span id="sort-icon-status"></span></th>
         </tr>
       </thead>
+      <!-- ✅ Correct ID -->
       <tbody id="reviewTableBody"></tbody>
     </table>
   </div>
 </main>
+
 <footer>
   &copy; 2025 Milford Music Studios Achievement App
 </footer>
-<script type="module" src="data/categories.js"></script>
+
 <script type="module" src="auth.js"></script>
 <script type="module" src="review-logs.js"></script>
 </body>

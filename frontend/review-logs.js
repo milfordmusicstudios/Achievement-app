@@ -3,10 +3,27 @@ import { getCurrentUser } from './auth.js';
 
 const supabase = createClient(
   'https://tpcjdgucyrqrzuqvshki.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MDE5OTksImV4cCI6MjA2ODI3Nzk5OX0.XGHcwyeTzYje6cjd3PHQrr7CyyEcaoRB4GyTYN1fDqo'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
 );
 
 const categories = ["Practice", "Participation", "Performance", "Improvement", "Teamwork"];
+
+function showMessage(msg) {
+  const div = document.createElement("div");
+  div.textContent = msg;
+  div.style.position = "fixed";
+  div.style.bottom = "40px";
+  div.style.left = "50%";
+  div.style.transform = "translateX(-50%)";
+  div.style.background = "#00477d";
+  div.style.color = "white";
+  div.style.padding = "12px 20px";
+  div.style.borderRadius = "10px";
+  div.style.fontSize = "16px";
+  div.style.zIndex = "9999";
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 3000);
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
   const user = getCurrentUser();
@@ -26,8 +43,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const users = userResult.data;
     const logs = logResult.data;
-    const summaryDiv = document.getElementById("categorySummary");
-    const tableBody = document.getElementById("reviewLogTableBody");
+    const summaryDiv = document.getElementById("categorySummaries");
+    const tableBody = document.getElementById("reviewTableBody");
 
     const summary = {};
     categories.forEach(cat => (summary[cat] = { count: 0, points: 0 }));
@@ -71,6 +88,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   } catch (err) {
     console.error("Error loading review logs:", err.message || err);
-    alert("Failed to load review logs.");
+    showMessage("Failed to load logs.");
   }
 });
