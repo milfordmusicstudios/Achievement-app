@@ -221,7 +221,7 @@ body.leaderboard-page .avatar-track .avatar {
 
 /* Restore normal avatar style for home/settings/etc */
 .avatar {
-  width: 120px;
+  width: 160px;
   height: auto;
   border-radius: 1rem;
   object-fit: cover;
