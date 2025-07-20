@@ -25,22 +25,37 @@ document.addEventListener("DOMContentLoaded", async () => {
   const avatarEl = document.getElementById("settingsAvatar");
   const avatarUpload = document.getElementById("avatarUpload");
 
-  // Populate values
+  // Custom toast message
+  function showMessage(msg) {
+    const div = document.createElement("div");
+    div.textContent = msg;
+    div.style.position = "fixed";
+    div.style.bottom = "40px";
+    div.style.left = "50%";
+    div.style.transform = "translateX(-50%)";
+    div.style.background = "#00477d";
+    div.style.color = "white";
+    div.style.padding = "12px 20px";
+    div.style.borderRadius = "10px";
+    div.style.fontSize = "16px";
+    div.style.zIndex = "9999";
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 3000);
+  }
+
+  // Load current data
   firstNameInput.value = user.firstName || "";
   lastNameInput.value = user.lastName || "";
   currentEmail.value = user.email || "";
   roleText.textContent = role;
 
-  // Load avatar
   if (avatarEl && user.avatar) {
     const { data } = supabase.storage.from("avatars").getPublicUrl(user.avatar);
-    if (data?.publicUrl) {
-      avatarEl.src = data.publicUrl;
-    }
+    if (data?.publicUrl) avatarEl.src = data.publicUrl;
   }
 
-  // Switch role
-  if (user.roles && user.roles.length > 1) {
+  // Handle role switch
+  if (user.roles?.length > 1) {
     switchRoleBtn.style.display = "inline-block";
     switchRoleBtn.addEventListener("click", () => {
       const currentIndex = user.roles.indexOf(role);
@@ -50,9 +65,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Save name
+  // ✅ Save name and refresh from Supabase
   document.getElementById("saveNameBtn").addEventListener("click", async (e) => {
     e.preventDefault();
+
     const { error } = await supabase
       .from("users")
       .update({
@@ -62,72 +78,86 @@ document.addEventListener("DOMContentLoaded", async () => {
       .eq("id", user.id);
 
     if (error) {
-      alert("Error saving name: " + error.message);
+      showMessage("Error saving name: " + error.message);
     } else {
-      alert("Name update saved!");
+      // Re-fetch updated user record from Supabase
+      const { data: refreshedUser, error: fetchError } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (fetchError) {
+        showMessage("Saved, but could not refresh user info.");
+      } else {
+        localStorage.setItem("loggedInUser", JSON.stringify(refreshedUser));
+        showMessage("Name update saved!");
+      }
     }
   });
 
-  // Update password (requires active session)
+  // ✅ Update password with session check
   document.getElementById("updateCredentialsBtn").addEventListener("click", async (e) => {
     e.preventDefault();
 
     if (!currentPassword.value || !newPassword.value) {
-      alert("Please enter both current and new password.");
+      showMessage("Enter both current and new password.");
       return;
     }
 
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-
     if (sessionError || !sessionData?.session) {
-      alert("Password update failed: You must be logged in.");
+      showMessage("Password update failed: Please log in again.");
       return;
     }
 
-    const { error: pwError } = await supabase.auth.updateUser({
-      password: newPassword.value,
-    });
+    const { error: pwError } = await supabase.auth.updateUser(
+      { password: newPassword.value },
+      { access_token: sessionData.session.access_token }
+    );
 
     if (pwError) {
-      alert("Password update failed: " + pwError.message);
+      showMessage("Password update failed: " + pwError.message);
     } else {
-      alert("Password updated successfully.");
+      showMessage("Password updated!");
       currentPassword.value = "";
       newPassword.value = "";
     }
   });
 
-  // Upload avatar
+  // ✅ Upload avatar
   avatarUpload.addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const filePath = `${user.id}/${Date.now()}_${file.name}`;
-
     const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(filePath, file, { upsert: true });
 
     if (uploadError) {
-      alert("Failed to upload avatar: " + uploadError.message);
+      showMessage("Avatar upload failed: " + uploadError.message);
       return;
     }
 
-    // Update user record
     const { error: updateError } = await supabase
       .from("users")
       .update({ avatar: filePath })
       .eq("id", user.id);
 
     if (updateError) {
-      alert("Uploaded avatar, but failed to update record: " + updateError.message);
+      showMessage("Uploaded avatar, but failed to save.");
       return;
     }
 
     const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
     if (data?.publicUrl) {
       avatarEl.src = data.publicUrl;
-      alert("Avatar updated!");
+
+      // Also update local user cache
+      const updatedUser = { ...user, avatar: filePath };
+      localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
+      showMessage("Avatar updated!");
     }
   });
 });
