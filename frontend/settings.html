@@ -10,6 +10,7 @@
   <main id="settingsPage" class="app settings-page">
     <h2 class="settings-title">Account Settings</h2>
 
+    <!-- Top Row: Avatar + Name -->
     <div class="settings-grid">
       <div class="left-side">
         <div class="avatar-wrapper">
@@ -19,34 +20,41 @@
       </div>
 
       <div class="right-side">
-        <p>Current Role: <span id="currentRoleText"></span></p>
-        <button id="switchRoleBtn" class="blue-button" style="display: none;">Switch Role</button>
-
         <form class="settings-form">
           <label>First Name</label>
           <input type="text" id="firstNameInput" />
 
           <label>Last Name</label>
           <input type="text" id="lastNameInput" />
-
-          <label>Current Email</label>
-          <input type="text" id="currentEmail" disabled />
-
-          <label>New Email</label>
-          <input type="email" id="newEmail" />
-
-          <label>New Password</label>
-          <input type="password" id="newPassword" />
-
-          <button id="updateCredentialsBtn" class="blue-button">Update Credentials</button>
         </form>
 
         <div class="button-row center">
+          <button id="saveNameBtn" class="blue-button">Save</button>
           <button class="blue-button" onclick="location.href='home.html'">Home</button>
-          <button class="blue-button" onclick="logout()">Log Out</button>
         </div>
       </div>
     </div>
+
+    <!-- Second Row: Email + Passwords -->
+    <form class="settings-form wide-form">
+      <label>Email</label>
+      <input type="text" id="currentEmail" disabled />
+
+      <label>Current Password</label>
+      <input type="password" id="currentPassword" />
+
+      <label>New Password</label>
+      <input type="password" id="newPassword" />
+
+      <div class="button-row center">
+        <button id="updateCredentialsBtn" class="blue-button">Update Credentials</button>
+        <button class="blue-button" onclick="logout()">Log Out</button>
+      </div>
+    </form>
+
+    <!-- Role and Switch -->
+    <p style="margin-top: 30px;">Current Role: <span id="currentRoleText"></span></p>
+    <button id="switchRoleBtn" class="blue-button" style="display: none;">Switch Role</button>
   </main>
 
   <footer>
