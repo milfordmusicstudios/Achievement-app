@@ -103,18 +103,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    const accessToken = sessionData?.session?.access_token;
+const { error: pwError } = await supabase.auth.updateUser({
+  password: newPassword.value
+});
 
-    if (!accessToken) {
-      showMessage("Password update failed: Please log in again.");
-      return;
-    }
-
-    const { error: pwError } = await supabase.auth.updateUser(
-      { password: newPassword.value },
-      { access_token: accessToken }
-    );
+if (pwError) {
+  showMessage("Password update failed: " + pwError.message);
+} else {
+  showMessage("Password updated!");
+  currentPassword.value = "";
+  newPassword.value = "";
+}
 
     if (pwError) {
       showMessage("Password update failed: " + pwError.message);
