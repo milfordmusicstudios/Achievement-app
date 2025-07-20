@@ -33,28 +33,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   const progressBar = document.getElementById("homeProgressBar");
   const percentEl = document.getElementById("homeProgressText");
   const myPointsBtn = document.getElementById("myPointsButton");
+  const levelProgressSection = document.getElementById("levelProgress");
 
   if (welcomeEl) welcomeEl.textContent = `Welcome ${user.firstName}`;
 
   try {
-    // Load avatar from public URL
-    if (avatarEl && user.avatarUrl) {
-      avatarEl.src = user.avatarUrl;
-      avatarEl.alt = `${user.firstName}'s Avatar`;
+    // Load avatar from Supabase storage
+    if (avatarEl && user.avatar) {
+      const { data, error } = supabase.storage.from("avatars").getPublicUrl(user.avatar);
+      if (data?.publicUrl) {
+        avatarEl.src = data.publicUrl;
+        avatarEl.alt = `${user.firstName}'s Avatar`;
+        console.log("✅ Avatar loaded:", data.publicUrl);
+      } else {
+        console.warn("⚠️ Avatar load error:", error?.message);
+      }
     }
 
-    // Hide "My Points" and progress for admin/teacher
+    // Hide student-only UI if not in student role
     if (role !== "student") {
       if (myPointsBtn) myPointsBtn.style.display = "none";
-const levelProgressSection = document.getElementById("levelProgress");
-
-if (role !== "student") {
-  if (myPointsBtn) myPointsBtn.style.display = "none";
-  if (levelProgressSection) levelProgressSection.style.display = "none";
-}
+      if (levelProgressSection) levelProgressSection.style.display = "none";
       if (badgeEl) badgeEl.src = `images/badges/${role}.png`;
     } else {
-      // Student badge and progress
+      // Student-specific badge and progress
       const { data: logs, error } = await supabase.from("logs").select("*");
       if (error) throw error;
       const { level, percent } = calculateUserLevel(user.id, logs, levels);
