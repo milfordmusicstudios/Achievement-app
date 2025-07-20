@@ -7,13 +7,11 @@ const supabase = createClient(
 );
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // ✅ Hydrate session by fetching current user from Supabase
-  const {
-    data: { user: authUser },
-    error: userError
-  } = await supabase.auth.getUser();
+  // ✅ Double-hydrate session and user
+  const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
+  const { data: userData, error: userErr } = await supabase.auth.getUser();
 
-  if (!authUser || userError) {
+  if (!sessionData?.session || !userData?.user || sessionErr || userErr) {
     alert("Session missing. Please log in again.");
     window.location.href = "index.html";
     return;
@@ -55,7 +53,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     setTimeout(() => div.remove(), 3000);
   }
 
-  // Load UI data
+  // Load user data
   firstNameInput.value = user.firstName || "";
   lastNameInput.value = user.lastName || "";
   currentEmail.value = user.email || "";
@@ -76,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // ✅ Save name and refresh localStorage
+  // ✅ Save name
   document.getElementById("saveNameBtn").addEventListener("click", async (e) => {
     e.preventDefault();
 
@@ -106,7 +104,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // ✅ Update password (session already restored)
+  // ✅ Update password
   document.getElementById("updateCredentialsBtn").addEventListener("click", async (e) => {
     e.preventDefault();
 
@@ -128,7 +126,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // ✅ Upload avatar and update localStorage
+  // ✅ Upload avatar
   avatarUpload.addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -162,7 +160,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // ✅ Logout button
+  // ✅ Logout
   logoutBtn?.addEventListener("click", (e) => {
     e.preventDefault();
     logout();
