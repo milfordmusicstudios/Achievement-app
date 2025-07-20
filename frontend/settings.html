@@ -14,8 +14,11 @@
     <div class="settings-grid">
       <div class="left-side">
         <div class="avatar-wrapper">
-          <img id="settingsAvatar" class="avatar" alt="Avatar" />
-          <div class="avatar-overlay">Click to update your avatar</div>
+          <label for="avatarUpload" style="cursor: pointer;">
+            <img id="settingsAvatar" class="avatar" alt="Avatar" />
+            <div class="avatar-overlay">Click to update your avatar</div>
+          </label>
+          <input type="file" id="avatarUpload" accept="image/*" style="display: none;" />
         </div>
       </div>
 
@@ -28,7 +31,7 @@
           <input type="text" id="lastNameInput" />
         </form>
 
-        <div class="button-row center">
+        <div class="button-row center" style="margin-top: 20px;">
           <button id="saveNameBtn" class="blue-button">Save</button>
           <button class="blue-button" onclick="location.href='home.html'">Home</button>
         </div>
@@ -36,7 +39,7 @@
     </div>
 
     <!-- Second Row: Email + Passwords -->
-    <form class="settings-form wide-form">
+    <form class="settings-form wide-form" style="margin-top: 30px;">
       <label>Email</label>
       <input type="text" id="currentEmail" disabled />
 
@@ -46,7 +49,7 @@
       <label>New Password</label>
       <input type="password" id="newPassword" />
 
-      <div class="button-row center">
+      <div class="button-row center" style="margin-top: 20px;">
         <button id="updateCredentialsBtn" class="blue-button">Update Credentials</button>
         <button class="blue-button" onclick="logout()">Log Out</button>
       </div>

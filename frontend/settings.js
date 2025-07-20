@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // Elements
   const firstNameInput = document.getElementById("firstNameInput");
   const lastNameInput = document.getElementById("lastNameInput");
   const currentEmail = document.getElementById("currentEmail");
@@ -24,6 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const roleText = document.getElementById("currentRoleText");
   const switchRoleBtn = document.getElementById("switchRoleBtn");
   const avatarEl = document.getElementById("settingsAvatar");
+  const avatarUpload = document.getElementById("avatarUpload");
 
   // Populate values
   firstNameInput.value = user.firstName || "";
@@ -33,14 +33,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Load avatar
   if (avatarEl && user.avatar) {
-    const { data, error } = supabase.storage.from("avatars").getPublicUrl(user.avatar);
+    const { data } = supabase.storage.from("avatars").getPublicUrl(user.avatar);
     if (data?.publicUrl) {
       avatarEl.src = data.publicUrl;
-      avatarEl.alt = `${user.firstName}'s Avatar`;
     }
   }
 
-  // Switch role (if user has multiple)
+  // Switch role
   if (user.roles && user.roles.length > 1) {
     switchRoleBtn.style.display = "inline-block";
     switchRoleBtn.addEventListener("click", () => {
@@ -51,24 +50,77 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Save name changes
-  document.getElementById("saveNameBtn").addEventListener("click", (e) => {
+  // Save name
+  document.getElementById("saveNameBtn").addEventListener("click", async (e) => {
     e.preventDefault();
-    console.log("Saving name:", firstNameInput.value, lastNameInput.value);
-    alert("Name changes saved (functionality to be implemented)");
+    const { error } = await supabase
+      .from("users")
+      .update({
+        firstName: firstNameInput.value,
+        lastName: lastNameInput.value,
+      })
+      .eq("id", user.id);
+
+    if (error) {
+      alert("Error saving name: " + error.message);
+    } else {
+      alert("Name changes saved!");
+    }
   });
 
-  // Update credentials
+  // Update password
   document.getElementById("updateCredentialsBtn").addEventListener("click", async (e) => {
     e.preventDefault();
 
     if (!currentPassword.value || !newPassword.value) {
-      alert("Please enter your current and new password.");
+      alert("Please enter both current and new password.");
       return;
     }
 
-    // This is where you'd verify the current password and update via Supabase Auth
-    console.log("Updating password to:", newPassword.value);
-    alert("Password update functionality coming soon.");
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword.value,
+    });
+
+    if (error) {
+      alert("Password update failed: " + error.message);
+    } else {
+      alert("Password updated successfully.");
+      currentPassword.value = "";
+      newPassword.value = "";
+    }
+  });
+
+  // Upload avatar
+  avatarUpload.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const filePath = `${user.id}/${Date.now()}_${file.name}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      alert("Failed to upload avatar: " + uploadError.message);
+      return;
+    }
+
+    // Update user record
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({ avatar: filePath })
+      .eq("id", user.id);
+
+    if (updateError) {
+      alert("Uploaded avatar, but failed to update record: " + updateError.message);
+      return;
+    }
+
+    const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+    if (data?.publicUrl) {
+      avatarEl.src = data.publicUrl;
+      alert("Avatar updated!");
+    }
   });
 });
