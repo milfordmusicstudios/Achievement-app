@@ -1,5 +1,3 @@
-// signup.js
-
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const supabase = createClient(
@@ -7,65 +5,37 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MDE5OTksImV4cCI6MjA2ODI3Nzk5OX0.XGHcwyeTzYje6cjd3PHQrr7CyyEcaoRB4GyTYN1fDqo'
 );
 
-// The rest of the original signup.js remains unchanged because it already connects correctly to Supabase.
-
-// Must be included AFTER config.js is loaded
-// Example usage:
-fetch(`${BASE_API}/users`)
-
-// img.src = `${BASE_UPLOAD}${user.avatarUrl}`;//
-
-// ✅ Load teacher options when the page loads
+// Load teachers into dropdown
 window.addEventListener("DOMContentLoaded", async () => {
   const teacherSelect = document.getElementById("teacher");
 
   try {
-const { data: users, error } = await supabase
-  .from("users")
-  .select("*");
+    const { data: users, error } = await supabase.from("users").select("*");
+    if (error) throw error;
 
-if (error) throw error;
+    const teachers = users.filter(u =>
+      Array.isArray(u.roles) ? u.roles.includes("teacher") : false
+    );
 
-const teacherUsers = users.filter(user => {
-const roles = Array.isArray(user.roles)
-  ? user.roles
-  : typeof user.roles === "string"
-    ? [user.roles]
-    : [];
-
-  return roles.includes("teacher");
-});
-
-    if (teacherUsers.length === 0) {
+    teachers.sort((a, b) =>
+      `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)
+    ).forEach(t => {
       const option = document.createElement("option");
-      option.textContent = "No teachers found";
-      option.disabled = true;
+      option.value = t.id;
+      option.textContent = `${t.firstName} ${t.lastName}`;
       teacherSelect.appendChild(option);
-    } else {
-teacherUsers
-  .sort((a, b) => {
-    const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
-    const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
-    return nameA.localeCompare(nameB);
-  })
-  .forEach(t => {
-    const option = document.createElement("option");
-    option.value = t.id;
-    option.textContent = `${t.firstName} ${t.lastName}`;
-    teacherSelect.appendChild(option);
-  });
-    }
+    });
 
   } catch (err) {
-    console.error("Error loading teachers:", err);
+    console.error("Failed to load teachers", err);
     const option = document.createElement("option");
-    option.disabled = true;
     option.textContent = "Error loading teachers";
+    option.disabled = true;
     teacherSelect.appendChild(option);
   }
 });
 
-// ✅ Handle form submission
+// Handle sign-up
 document.getElementById('signupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -77,56 +47,49 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
   const password = document.getElementById('password').value;
 
   if (!firstName || !lastName || !instrument || !teacher || !email || !password) {
-    showError("Please fill out all fields.");
-    return;
+    return showError("Please fill out all fields.");
   }
 
-  const id = `${lastName}_${firstName}`.replace(/\s+/g, "_");
+  // ✅ 1. Create Supabase auth user
+  const { data: authData, error: authError } = await supabase.auth.signUp({
+    email,
+    password
+  });
 
-const newUser = {
-  id: `${lastName}_${firstName}`,
-  firstName,
-  lastName,
-  email,
-  password,
-  instrument: instrument || "",
-  avatar: `${lastName}_${firstName}`,
-  avatarUrl: `/uploads/${lastName}_${firstName}.png`,
+  if (authError || !authData?.user) {
+    console.error("Auth signup failed:", authError?.message);
+    return showError("Signup failed: " + (authError?.message || "Unknown error."));
+  }
 
-  // ✅ Fixed: hard-coded default role
-  roles: ["student"],
+  const userId = authData.user.id;
 
-  // ✅ Already correct
-  teacher: typeof teacher === "string" ? teacher : "",
+  // ✅ 2. Create profile in "users" table (excluding password)
+  const newUserProfile = {
+    id: userId,
+    firstName,
+    lastName,
+    email,
+    roles: ["student"],
+    teacher,
+    instrument,
+    avatar: "", // you can generate a default here if needed
+    createdAt: new Date().toISOString()
+  };
 
-  createdAt: new Date().toISOString()
-};
-
-try {
-  const { data, error } = await supabase
+  const { data: profileData, error: profileError } = await supabase
     .from("users")
-    .insert([newUser]);
+    .insert([newUserProfile]);
 
-  if (error) {
-    console.error("Signup failed:", error.message);
-    showError("Signup failed: " + error.message);
-    return;
+  if (profileError) {
+    console.error("Failed to save profile:", profileError);
+    return showError("Signup failed: could not save profile.");
   }
 
-  const createdUser = data[0]; // renamed to avoid shadowing
-  localStorage.setItem("loggedInUser", JSON.stringify(createdUser));
+  // ✅ 3. Store and redirect
+  localStorage.setItem("loggedInUser", JSON.stringify(newUserProfile));
+  localStorage.setItem("activeRole", "student");
 
-  const activeRole = Array.isArray(createdUser.role || createdUser.roles)
-    ? (createdUser.role || createdUser.roles)[0]
-    : (createdUser.role || createdUser.roles || "student");
-
-  localStorage.setItem("activeRole", activeRole);
   window.location.href = "home.html";
-
-} catch (err) {
-  console.error("Signup error:", err);
-  showError("Something went wrong. Please try again.");
-}
 });
 
 function showError(message) {
