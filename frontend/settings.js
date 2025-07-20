@@ -7,13 +7,13 @@ const supabase = createClient(
 );
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // ✅ Force session hydration
+  // ✅ Hydrate session by fetching current user from Supabase
   const {
-    data: { session },
-    error: sessionError
-  } = await supabase.auth.getSession();
+    data: { user: authUser },
+    error: userError
+  } = await supabase.auth.getUser();
 
-  if (!session || sessionError) {
+  if (!authUser || userError) {
     alert("Session missing. Please log in again.");
     window.location.href = "index.html";
     return;
@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     setTimeout(() => div.remove(), 3000);
   }
 
-  // Load data
+  // Load UI data
   firstNameInput.value = user.firstName || "";
   lastNameInput.value = user.lastName || "";
   currentEmail.value = user.email || "";
@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // ✅ Save name and refresh
+  // ✅ Save name and refresh localStorage
   document.getElementById("saveNameBtn").addEventListener("click", async (e) => {
     e.preventDefault();
 
@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // ✅ Password update — no token required if session initialized
+  // ✅ Update password (session already restored)
   document.getElementById("updateCredentialsBtn").addEventListener("click", async (e) => {
     e.preventDefault();
 
@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // ✅ Upload avatar
+  // ✅ Upload avatar and update localStorage
   avatarUpload.addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -149,7 +149,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       .eq("id", user.id);
 
     if (updateError) {
-      showMessage("Avatar saved, but user record failed.");
+      showMessage("Uploaded avatar, but failed to save.");
       return;
     }
 
@@ -162,7 +162,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // ✅ Logout
+  // ✅ Logout button
   logoutBtn?.addEventListener("click", (e) => {
     e.preventDefault();
     logout();
