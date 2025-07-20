@@ -1838,3 +1838,21 @@ tr.editing .save-button {
 #userTable td:nth-child(9) {
   min-width: 120px;
 }
+.settings-grid {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 900px;
+}
+
+.left-side {
+  flex: 0 0 auto;
+}
+
+.right-side {
+  flex: 1;
+  min-width: 250px;
+}

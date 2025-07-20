@@ -6,39 +6,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <main class="settings-page">
-    <h2 class="header">Account Settings</h2>
-    <div class="settings-container">
-      <div class="settings-left">
-        <img id="settingsAvatar" class="avatar" src="" alt="Avatar" />
-        <p id="currentRoleLabel"></p>
+<body class="white-background settings-page">
+  <main id="settingsPage" class="app settings-page">
+    <h2 class="settings-title">Account Settings</h2>
+
+    <div class="settings-grid">
+      <div class="left-side">
+        <div class="avatar-wrapper">
+          <img id="settingsAvatar" class="avatar" alt="Avatar" />
+          <div class="avatar-overlay">Click to update your avatar</div>
+        </div>
+      </div>
+
+      <div class="right-side">
+        <p>Current Role: <span id="currentRoleText"></span></p>
         <button id="switchRoleBtn" class="blue-button" style="display: none;">Switch Role</button>
+
+        <form class="settings-form">
+          <label>First Name</label>
+          <input type="text" id="firstNameInput" />
+
+          <label>Last Name</label>
+          <input type="text" id="lastNameInput" />
+
+          <label>Current Email</label>
+          <input type="text" id="currentEmail" disabled />
+
+          <label>New Email</label>
+          <input type="email" id="newEmail" />
+
+          <label>New Password</label>
+          <input type="password" id="newPassword" />
+
+          <button id="updateCredentialsBtn" class="blue-button">Update Credentials</button>
+        </form>
+
+        <div class="button-row center">
+          <button class="blue-button" onclick="location.href='home.html'">Home</button>
+          <button class="blue-button" onclick="logout()">Log Out</button>
+        </div>
       </div>
-
-      <div class="settings-right">
-        <label for="firstName">First Name</label>
-        <input type="text" id="firstName" />
-
-        <label for="lastName">Last Name</label>
-        <input type="text" id="lastName" />
-
-        <label for="email">Current Email</label>
-        <input type="email" id="email" disabled />
-
-        <label for="newEmail">New Email</label>
-        <input type="email" id="newEmail" />
-
-        <label for="newPassword">New Password</label>
-        <input type="password" id="newPassword" />
-
-        <button class="blue-button" id="updateBtn">Update Credentials</button>
-      </div>
-    </div>
-
-    <div class="footer-buttons">
-      <button class="blue-button" onclick="window.location.href='home.html'">Home</button>
-      <button class="blue-button" onclick="logout()">Log Out</button>
     </div>
   </main>
 
@@ -46,65 +53,6 @@
     &copy; 2025 Milford Music Studios Achievement App
   </footer>
 
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-    import { getCurrentUser, getActiveRole, logout } from './auth.js';
-
-    const supabase = createClient(
-      'https://tpcjdgucyrqrzuqvshki.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwY2pkZ3VjeXJxcnp1cXZzaGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MDE5OTksImV4cCI6MjA2ODI3Nzk5OX0.XGHcwyeTzYje6cjd3PHQrr7CyyEcaoRB4GyTYN1fDqo'
-    );
-
-    const user = getCurrentUser();
-    const activeRole = getActiveRole();
-
-    if (!user) window.location.href = "index.html";
-
-    document.getElementById("firstName").value = user.firstName || "";
-    document.getElementById("lastName").value = user.lastName || "";
-    document.getElementById("email").value = user.email || "";
-
-    document.getElementById("currentRoleLabel").textContent = "Current Role: " + activeRole;
-
-    // Show Switch Role button if user has more than one role
-    if (Array.isArray(user.roles) && user.roles.length > 1) {
-      document.getElementById("switchRoleBtn").style.display = "inline-block";
-      document.getElementById("switchRoleBtn").addEventListener("click", () => {
-        const current = getActiveRole();
-        const next = user.roles.find(r => r !== current);
-        if (next) {
-          localStorage.setItem("activeRole", next);
-          window.location.reload();
-        }
-      });
-    }
-
-    // Load avatar if available
-    if (user.avatarUrl) {
-      const { data } = supabase.storage.from("avatars").getPublicUrl(user.avatarUrl);
-      if (data?.publicUrl) {
-        document.getElementById("settingsAvatar").src = data.publicUrl;
-      }
-    }
-
-    document.getElementById("updateBtn").addEventListener("click", async () => {
-      const updates = {
-        firstName: document.getElementById("firstName").value,
-        lastName: document.getElementById("lastName").value,
-        email: user.email, // keep original
-        ...(document.getElementById("newEmail").value && { email: document.getElementById("newEmail").value }),
-        ...(document.getElementById("newPassword").value && { password: document.getElementById("newPassword").value }),
-      };
-
-      const { error } = await supabase.from("users").update(updates).eq("id", user.id);
-      if (error) {
-        alert("Update failed.");
-        console.error(error.message);
-      } else {
-        alert("Account updated successfully.");
-        window.location.reload();
-      }
-    });
-  </script>
+  <script type="module" src="settings.js"></script>
 </body>
 </html>
