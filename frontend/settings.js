@@ -64,11 +64,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (error) {
       alert("Error saving name: " + error.message);
     } else {
-      alert("Name changes saved!");
+      alert("Name update saved!");
     }
   });
 
-  // Update password
+  // Update password (requires active session)
   document.getElementById("updateCredentialsBtn").addEventListener("click", async (e) => {
     e.preventDefault();
 
@@ -77,12 +77,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const { error } = await supabase.auth.updateUser({
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+    if (sessionError || !sessionData?.session) {
+      alert("Password update failed: You must be logged in.");
+      return;
+    }
+
+    const { error: pwError } = await supabase.auth.updateUser({
       password: newPassword.value,
     });
 
-    if (error) {
-      alert("Password update failed: " + error.message);
+    if (pwError) {
+      alert("Password update failed: " + pwError.message);
     } else {
       alert("Password updated successfully.");
       currentPassword.value = "";
