@@ -24,8 +24,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const switchRoleBtn = document.getElementById("switchRoleBtn");
   const avatarEl = document.getElementById("settingsAvatar");
   const avatarUpload = document.getElementById("avatarUpload");
+  const logoutBtn = document.getElementById("logoutBtn");
 
-  // Custom toast message
   function showMessage(msg) {
     const div = document.createElement("div");
     div.textContent = msg;
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     setTimeout(() => div.remove(), 3000);
   }
 
-  // Load current data
+  // Load user data
   firstNameInput.value = user.firstName || "";
   lastNameInput.value = user.lastName || "";
   currentEmail.value = user.email || "";
@@ -54,7 +54,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (data?.publicUrl) avatarEl.src = data.publicUrl;
   }
 
-  // Handle role switch
   if (user.roles?.length > 1) {
     switchRoleBtn.style.display = "inline-block";
     switchRoleBtn.addEventListener("click", () => {
@@ -65,7 +64,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // ✅ Save name and refresh from Supabase
+  // ✅ Save name
   document.getElementById("saveNameBtn").addEventListener("click", async (e) => {
     e.preventDefault();
 
@@ -80,7 +79,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (error) {
       showMessage("Error saving name: " + error.message);
     } else {
-      // Re-fetch updated user record from Supabase
       const { data: refreshedUser, error: fetchError } = await supabase
         .from("users")
         .select("*")
@@ -96,7 +94,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // ✅ Update password with session check
+  // ✅ Update password securely
   document.getElementById("updateCredentialsBtn").addEventListener("click", async (e) => {
     e.preventDefault();
 
@@ -106,14 +104,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !sessionData?.session) {
+    const accessToken = sessionData?.session?.access_token;
+
+    if (!accessToken) {
       showMessage("Password update failed: Please log in again.");
       return;
     }
 
     const { error: pwError } = await supabase.auth.updateUser(
       { password: newPassword.value },
-      { access_token: sessionData.session.access_token }
+      { access_token: accessToken }
     );
 
     if (pwError) {
@@ -153,11 +153,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
     if (data?.publicUrl) {
       avatarEl.src = data.publicUrl;
-
-      // Also update local user cache
       const updatedUser = { ...user, avatar: filePath };
       localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
       showMessage("Avatar updated!");
     }
+  });
+
+  // ✅ Log out button fix
+  logoutBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    logout();
   });
 });
