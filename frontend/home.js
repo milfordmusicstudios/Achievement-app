@@ -46,8 +46,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Hide "My Points" and progress for admin/teacher
     if (role !== "student") {
       if (myPointsBtn) myPointsBtn.style.display = "none";
-      if (progressBar) progressBar.style.display = "none";
-      if (percentEl) percentEl.style.display = "none";
+const levelProgressSection = document.getElementById("levelProgress");
+
+if (role !== "student") {
+  if (myPointsBtn) myPointsBtn.style.display = "none";
+  if (levelProgressSection) levelProgressSection.style.display = "none";
+}
       if (badgeEl) badgeEl.src = `images/badges/${role}.png`;
     } else {
       // Student badge and progress
