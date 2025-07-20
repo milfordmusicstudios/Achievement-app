@@ -7,8 +7,17 @@ const supabase = createClient(
 );
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // ✅ Ensure session is initialized before anything else
-  await supabase.auth.getSession();
+  // ✅ Force session hydration
+  const {
+    data: { session },
+    error: sessionError
+  } = await supabase.auth.getSession();
+
+  if (!session || sessionError) {
+    alert("Session missing. Please log in again.");
+    window.location.href = "index.html";
+    return;
+  }
 
   const user = getCurrentUser();
   const role = getActiveRole();
@@ -46,7 +55,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     setTimeout(() => div.remove(), 3000);
   }
 
-  // Load user data
+  // Load data
   firstNameInput.value = user.firstName || "";
   lastNameInput.value = user.lastName || "";
   currentEmail.value = user.email || "";
@@ -67,7 +76,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // ✅ Save name
+  // ✅ Save name and refresh
   document.getElementById("saveNameBtn").addEventListener("click", async (e) => {
     e.preventDefault();
 
@@ -89,7 +98,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         .single();
 
       if (fetchError) {
-        showMessage("Saved, but could not refresh user info.");
+        showMessage("Saved, but couldn't refresh.");
       } else {
         localStorage.setItem("loggedInUser", JSON.stringify(refreshedUser));
         showMessage("Name update saved!");
@@ -97,12 +106,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // ✅ Update password (no session token needed if session initialized)
+  // ✅ Password update — no token required if session initialized
   document.getElementById("updateCredentialsBtn").addEventListener("click", async (e) => {
     e.preventDefault();
 
     if (!currentPassword.value || !newPassword.value) {
-      showMessage("Enter both current and new password.");
+      showMessage("Enter current and new password.");
       return;
     }
 
@@ -140,7 +149,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       .eq("id", user.id);
 
     if (updateError) {
-      showMessage("Uploaded avatar, but failed to save.");
+      showMessage("Avatar saved, but user record failed.");
       return;
     }
 
@@ -153,7 +162,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // ✅ Log out
+  // ✅ Logout
   logoutBtn?.addEventListener("click", (e) => {
     e.preventDefault();
     logout();
