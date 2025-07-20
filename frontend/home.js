@@ -1,3 +1,4 @@
+// home.js
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 import { getCurrentUser, getActiveRole } from './auth.js';
@@ -31,31 +32,31 @@ document.addEventListener("DOMContentLoaded", async () => {
   const badgeEl = document.getElementById("homeBadge");
   const progressBar = document.getElementById("homeProgressBar");
   const percentEl = document.getElementById("homeProgressText");
-  const percentLabel = document.getElementById("homeProgressLabel");
-  const progressCard = document.getElementById("progressCard");
+  const myPointsBtn = document.getElementById("myPointsButton");
 
   if (welcomeEl) welcomeEl.textContent = `Welcome ${user.firstName}`;
 
-  if (avatarEl) {
-    avatarEl.src = user.avatarUrl || "avatars/default.png";
-  }
-
   try {
-    if (["admin", "teacher"].includes(role)) {
-      if (badgeEl) badgeEl.src = `images/badges/${role}.png`;
-      if (progressCard) progressCard.style.display = "none";
+    // Load avatar from public URL
+    if (avatarEl && user.avatarUrl) {
+      avatarEl.src = user.avatarUrl;
+      avatarEl.alt = `${user.firstName}'s Avatar`;
+    }
+
+    // Hide "My Points" and progress for admin/teacher
+    if (role !== "student") {
+      if (myPointsBtn) myPointsBtn.style.display = "none";
       if (progressBar) progressBar.style.display = "none";
       if (percentEl) percentEl.style.display = "none";
-      if (percentLabel) percentLabel.style.display = "none";
-      document.getElementById("myPointsBtn")?.classList.add("hidden");
+      if (badgeEl) badgeEl.src = `images/badges/${role}.png`;
     } else {
+      // Student badge and progress
       const { data: logs, error } = await supabase.from("logs").select("*");
       if (error) throw error;
       const { level, percent } = calculateUserLevel(user.id, logs, levels);
       if (badgeEl) badgeEl.src = level.badge;
       if (progressBar) progressBar.style.width = `${percent}%`;
       if (percentEl) percentEl.textContent = `${percent}% to next level`;
-      if (percentLabel) percentLabel.innerHTML = `<span id="levelPercent">${percent}%</span> to next level`;
     }
   } catch (err) {
     console.error("Home page error:", err.message || err);

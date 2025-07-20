@@ -15,14 +15,15 @@
         <img id="homeBadge" class="badge" src="" alt="Level Badge" />
       </div>
 
-<div class="progress-card" id="progressCard"> <!-- ADD ID HERE -->
-  <div class="progress-label">Level Progress</div>
-  <div class="progress-container">
-    <div class="percent-label" id="homeProgressLabel"><span id="levelPercent">0%</span> to next level</div>
-    <div class="progress-bar" id="homeProgressBar" style="width: 0%;"></div>
-  </div>
-</div>
-<div class="percent-text" id="homeProgressText">75% to next level</div>
+      <div class="progress-card">
+        <div class="progress-label">Level Progress</div>
+        <div class="progress-container">
+          <div class="percent-label"><span id="levelPercent">0%</span> to next level</div>
+          <div class="progress-bar" id="homeProgressBar" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div class="percent-text" id="homeProgressText">75% to next level</div>
 
       <div class="button-wrapper">
         <div class="button-area">
@@ -31,7 +32,7 @@
               <img class="icon" src="images/icons/log.png" alt="Log Icon" /> Log Points
             </button>
 
-            <button id="myPointsBtn" class="nav-button points" onclick="location.href='my-points.html'">
+            <button id="myPointsButton" class="nav-button points" onclick="location.href='my-points.html'">
               <div class="btn-content">
                 <div class="btn-icon">
                   <img src="images/icons/myachievements.png" alt="My Points Icon" />
@@ -81,42 +82,29 @@
   <script type="module" src="auth.js"></script>
   <script type="module" src="home.js"></script>
 
-  
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const user = JSON.parse(localStorage.getItem("loggedInUser"));
-    const storedRole = localStorage.getItem("activeRole");
-const role = Array.isArray(user?.roles) ? user.roles[0] : user?.roles || storedRole;
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const user = JSON.parse(localStorage.getItem("loggedInUser"));
+      const storedRole = localStorage.getItem("activeRole");
+      const role = Array.isArray(user?.roles) ? user.roles[0] : user?.roles || storedRole;
 
-    const myPointsBtn = document.getElementById("myPointsBtn");
-    const reviewLogsBtn = document.getElementById("reviewLogsBtn");
-    const manageUsersBtn = document.getElementById("manageUsersBtn");
+      const reviewLogsBtn = document.getElementById("reviewLogsBtn");
+      const manageUsersBtn = document.getElementById("manageUsersBtn");
 
-    if (!user || !role) return;
+      if (!user || !role) return;
 
-// Only show My Points if student
-if (myPointsBtn && role === "student") {
-  myPointsBtn.style.display = "inline-block";
-} else if (myPointsBtn) {
-  myPointsBtn.style.display = "none";
-}
+      if (["admin", "teacher"].includes(role)) {
+        if (reviewLogsBtn) reviewLogsBtn.style.display = "inline-block";
+      }
 
-    if (["admin", "teacher"].includes(role)) {
-      if (reviewLogsBtn) reviewLogsBtn.style.display = "inline-block";
+      if (role === "admin") {
+        if (manageUsersBtn) manageUsersBtn.style.display = "inline-block";
+      }
+    });
+
+    function goToManageUsers() {
+      window.location.href = "manage-users.html";
     }
-
-    if (role === "admin") {
-      if (manageUsersBtn) manageUsersBtn.style.display = "inline-block";
-    }
-
-    console.log("User:", user);
-    console.log("Active Role:", role);
-  });
-
-  function goToManageUsers() {
-    window.location.href = "manage-users.html";
-  }
-</script>
-
+  </script>
 </body>
 </html>
