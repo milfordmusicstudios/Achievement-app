@@ -7,6 +7,9 @@ const supabase = createClient(
 );
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // ✅ Ensure session is initialized before anything else
+  await supabase.auth.getSession();
+
   const user = getCurrentUser();
   const role = getActiveRole();
 
@@ -94,7 +97,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // ✅ Update password securely
+  // ✅ Update password (no session token needed if session initialized)
   document.getElementById("updateCredentialsBtn").addEventListener("click", async (e) => {
     e.preventDefault();
 
@@ -103,17 +106,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-const { error: pwError } = await supabase.auth.updateUser({
-  password: newPassword.value
-});
-
-if (pwError) {
-  showMessage("Password update failed: " + pwError.message);
-} else {
-  showMessage("Password updated!");
-  currentPassword.value = "";
-  newPassword.value = "";
-}
+    const { error: pwError } = await supabase.auth.updateUser({
+      password: newPassword.value
+    });
 
     if (pwError) {
       showMessage("Password update failed: " + pwError.message);
@@ -158,7 +153,7 @@ if (pwError) {
     }
   });
 
-  // ✅ Log out button fix
+  // ✅ Log out
   logoutBtn?.addEventListener("click", (e) => {
     e.preventDefault();
     logout();
