@@ -43,6 +43,28 @@ document.addEventListener("DOMContentLoaded", () => {
       errorDisplay.style.display = "block";
       return;
     }
+document.getElementById("forgotPasswordLink").addEventListener("click", async (e) => {
+  e.preventDefault();
+  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+  const errorDisplay = document.getElementById("loginError");
+
+  if (!email) {
+    errorDisplay.textContent = "Please enter your email address first.";
+    errorDisplay.style.display = "block";
+    return;
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: "https://achievement-app-nine.vercel.app/reset-password.html"
+  });
+
+  if (error) {
+    errorDisplay.textContent = "Error sending reset email: " + error.message;
+  } else {
+    errorDisplay.style.color = "green";
+    errorDisplay.textContent = "Password reset email sent!";
+  }
+});
 
     const roles = Array.isArray(userRecord.roles) ? userRecord.roles : [];
     const activeRole = roles.length > 0 ? roles[0] : "student";
