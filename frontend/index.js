@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | Achievement App</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container center-content">
+    <h1>Achievement App</h1>
+    <h2>Login</h2>
+    <form id="loginForm" class="form-card">
+      <label for="loginEmail">Email:</label>
+      <input type="email" id="loginEmail" required />
+
+      <label for="loginPassword">Password:</label>
+      <input type="password" id="loginPassword" required />
+
+      <button type="submit" class="blue-button">Login</button>
+      <p id="loginError" class="error-message" style="display: none;"></p>
+    </form>
+<p><a href="#" id="forgotPasswordLink">Forgot your password?</a></p>
+
+    <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
+  </div>
+
+  <!-- ✅ Load secure login logic -->
+  <script type="module" src="auth.js"></script>
+  <script type="module" src="login.js"></script>
+</body>
+</html>
