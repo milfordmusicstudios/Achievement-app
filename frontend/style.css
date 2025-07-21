@@ -66,6 +66,10 @@ html, body {
   display: block;
 }
 
+.logo-container {
+  text-align: center;
+  margin-bottom: 10px;
+}
 
 
 /* 🔷 Base Button Styles */
